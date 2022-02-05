@@ -87,6 +87,7 @@ function GameService:toLoading()
     self:updateParticipatingPlayers()
     self._map:loadMap()
     self._map:spawnPlayers(self._participatingPlayers, "random")
+    self._mode:freezePlayers(self._participatingPlayers)
     self:toCountdown()
 end
 

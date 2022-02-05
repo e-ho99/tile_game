@@ -14,14 +14,29 @@ function Mode.new(map, participatingPlayers)
     self._currentRound = 0
     self._roundTotal = 1
     self._hints = {}
+    self._participatingPlayers = participatingPlayers
     self._playerModeData = self:getPlayerModeData(participatingPlayers)
-    
+
+    self:initPlayerEvents(participatingPlayers)
     return self
+end
+
+function Mode:initPlayerEvents(playerList)
+    for _, player in pairs (playerList) do
+        player.CharacterAdded:Connect(function()
+            local gameStatus = engine.services.game_service._status
+
+            if gameStatus == "Countdown" or gameStatus == "Loading" then
+                self:freezePlayers({player})
+            end
+        end)
+    end
 end
 
 function Mode:startRound()
     engine.services.timer_service:enable(self._roundTime)
     self._currentRound = self._currentRound + 1
+    self:thawPlayers(self._participatingPlayers)
 end
 
 function Mode:roundComplete()
@@ -67,6 +82,24 @@ function Mode:getWinners()
     end
 
     return winners
+end
+
+function Mode:freezePlayers(playerList)
+    for _, player in pairs(playerList) do
+        if player then
+            local c = player.Character or player.CharacterAdded:Wait()
+            c.HumanoidRootPart.Anchored = true
+        end
+    end
+end
+
+function Mode:thawPlayers(playerList)
+    for _, player in pairs(playerList) do
+        if player then
+            local c = player.Character
+            c.HumanoidRootPart.Anchored = false
+        end
+    end
 end
 
 function Mode:Destroy()
