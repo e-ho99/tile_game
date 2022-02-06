@@ -16,20 +16,21 @@ function Mode.new(map, participatingPlayers)
     self._hints = {}
     self._participatingPlayers = participatingPlayers
     self._playerModeData = self:getPlayerModeData(participatingPlayers)
+    self._events = {}
 
-    self:initPlayerEvents(participatingPlayers)
+    self:initCountdownEvents(participatingPlayers)
     return self
 end
 
-function Mode:initPlayerEvents(playerList)
-    for _, player in pairs (playerList) do
-        player.CharacterAdded:Connect(function()
-            local gameStatus = engine.services.game_service._status
+function Mode:eliminate(player)
+    -- handles elimination of player; defaults to elimination on first death --
+    local data = self._playerModeData[player]
 
-            if gameStatus == "Countdown" or gameStatus == "Loading" then
-                self:freezePlayers({player})
-            end
-        end)
+    if data then
+        data["Alive"] = false
+        data["Active"] = false
+
+        print("Eliminated", player)
     end
 end
 
@@ -103,7 +104,45 @@ function Mode:thawPlayers(playerList)
 end
 
 function Mode:Destroy()
-    -- disconnect associated events -- 
+    for _, e in pairs (self._events) do
+        e:Disconnect()
+    end
+end
+
+--[[ EVENTS ]]--
+function Mode:initCountdownEvents(playerList)
+    for _, player in pairs (playerList) do
+        local event = player.CharacterAdded:Connect(function()
+            local gameStatus = engine.services.game_service._status
+
+            if gameStatus == "Countdown" or gameStatus == "Loading" then
+                self:freezePlayers({player})
+            end
+        end)
+
+        table.insert(self._events, event)
+    end
+end
+
+function Mode:initPlayerEvents(playerList)
+    for _, player in pairs (playerList) do
+        local c = player.Character
+
+        if c then
+            c.Humanoid.Died:Connect(function()
+                self:eliminate(player)
+            end)
+        end
+
+        local event = player.CharacterAdded:Connect(function(c)
+            local character = c
+            character.Humanoid.Died:Connect(function()
+                self:eliminate(player)
+            end)
+        end)
+
+        table.insert(self._events, event)
+    end
 end
 
 return Mode

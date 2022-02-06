@@ -12,6 +12,7 @@ function Classic.new()
     local self =  setmetatable(engine.classes.map.new(), Classic)
     self._modes = {"Disappearing Plates"}
     self._mapTemplate = game.ServerStorage.Maps.Classic
+    self._name = "classic"
     
     return self
 end

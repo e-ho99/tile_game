@@ -77,7 +77,7 @@ function GameService:toGameSelect()
     self._status = "Selection"
     sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
     self:selectMap()
-    self:selectMode(self._map._mapTemplate.Name:lower())
+    self:selectMode(self._map)
     self:toLoading()
 end
 
@@ -86,6 +86,8 @@ function GameService:toLoading()
     sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
     self:updateParticipatingPlayers()
     self._map:loadMap()
+    self._mode:initMapEvents()
+    self._mode:initPlayerEvents(self._participatingPlayers)
     self._map:spawnPlayers(self._participatingPlayers, "random")
     self._mode:freezePlayers(self._participatingPlayers)
     self:toCountdown()
