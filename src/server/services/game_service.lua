@@ -18,8 +18,27 @@ function GameService.new()
 
     self._minimumPlayers = 1
 
+    self:initEvents()
     print("Created Game Service")
     return self
+end
+
+function GameService:initEvents()
+    game.Players.PlayerRemoving:Connect(function(player)
+        if self._mode then
+            self._mode:clearPlayerData(player)
+        end
+
+        for i, p in pairs (self._participatingPlayers) do
+            if p == player then
+                table.remove(self._participatingPlayer, i)
+            end
+        end
+    end)
+
+    sharedEvents.GetStatus.OnServerInvoke = function()
+        return self._status
+    end
 end
 
 function GameService:activate()
@@ -38,6 +57,7 @@ function GameService:clear()
     self._mode:respawnPlayers()
     self._map:Destroy()
     self._mode:Destroy()
+    self._participatingPlayers = {}
 
     self._map, self._mode = nil, nil
 
@@ -77,7 +97,7 @@ function GameService:toGameSelect()
     self._status = "Selection"
     sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
     self:selectMap()
-    self:selectMode(self._map._mapTemplate.Name:lower())
+    self:selectMode(self._map)
     self:toLoading()
 end
 
@@ -86,6 +106,8 @@ function GameService:toLoading()
     sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
     self:updateParticipatingPlayers()
     self._map:loadMap()
+    self._mode:initMapEvents()
+    self._mode:initPlayerEvents(self._participatingPlayers)
     self._map:spawnPlayers(self._participatingPlayers, "random")
     self._mode:freezePlayers(self._participatingPlayers)
     self:toCountdown()
@@ -103,12 +125,15 @@ function GameService:toPlaying()
     self._mode:startRound()
 end
 
+
 function GameService:toPostgame()
     self._status = "Postgame"
     sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
-    local winners = self._mode:getWinners()
+    local winners, winnersString = self._mode:getWinners()
+    sharedEvents.GameEvents.SendWinners:FireAllClients(winnersString)
     self:clear()
     self:toIntermission()
+    
     print("Winners:", winners)
 end
 
@@ -126,7 +151,7 @@ function GameService:timerComplete()
         self:toPlaying()
     elseif self._status == "Playing" then
         local finalRoundDone = self._mode:roundComplete()
-
+        
         if finalRoundDone then
             self:toPostgame()
         end

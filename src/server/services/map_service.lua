@@ -23,7 +23,8 @@ function MapService:selectMap()
 end
 
 function MapService:selectMode(map)
-    local possibleModes = self._mapToModes[map]
+    print(map, map._name)
+    local possibleModes = self._mapToModes[map._name]
     return possibleModes[math.random(1, #possibleModes)]
 end
 
