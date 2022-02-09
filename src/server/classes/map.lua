@@ -29,7 +29,9 @@ function Map:spawnPlayers(playerList, spawnType)
                 local character = player.Character or player.CharacterAdded:Wait()
                 local num = math.random(1, #tiles)
                 local selectedTile = tiles[num]
-                character.HumanoidRootPart.CFrame = selectedTile.PrimaryPart.CFrame * CFrame.new(0, 5, 0)
+
+                character.HumanoidRootPart.CFrame = selectedTile.PrimaryPart.CFrame * CFrame.new(0, (
+                    character:GetExtentsSize().Y / 2) + (selectedTile.PrimaryPart.Size.Y / 2), 0)
 
                 table.remove(tiles, num)
             end

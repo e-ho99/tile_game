@@ -9,7 +9,7 @@ function InterfaceService.new()
     local self = setmetatable({}, InterfaceService)
 
     self._playerGuis = {} -- stores references to gui objects
-    self._starterGuis = {"timerUI"} -- guis added when player joins
+    self._starterGuis = {{"timerUI", true}, {"winnersUI", false}} -- guis added when player joins
     
     self:initGuis()
 
@@ -18,8 +18,8 @@ function InterfaceService.new()
 end
 
 function InterfaceService:initGuis()
-    for _, guiName in pairs(self._starterGuis) do
-        self:addGui(guiName, true)
+    for _, guiData in pairs(self._starterGuis) do
+        self:addGui(guiData[1], guiData[2])
     end
 end
 

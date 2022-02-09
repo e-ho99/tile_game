@@ -12,9 +12,26 @@ end
 function DisppearingPlates.new(map, participatingPlayers)
     local self =  setmetatable(engine.classes.mode.new(map, participatingPlayers), DisppearingPlates)
     self._name = "Disappearing Plates"
-    self._roundTime = 10
+    self._roundTime = 60
+    self._goalPlayerCount = 2
 
     return self
+end
+
+function DisppearingPlates:eliminate(player)
+    -- handles elimination of player; defaults to elimination on first death --
+    local data = self._playerModeData[player]
+
+    if data and data["Active"] then
+        data["Alive"] = false
+        data["Active"] = false
+        
+        print("Eliminated", player)
+
+        if self:_countActivePlayers() <= self._goalPlayerCount then
+            engine.services.game_service:toPostgame()
+        end
+    end
 end
 
 function DisppearingPlates:initMapEvents()
@@ -40,7 +57,7 @@ function DisppearingPlates:initMapEvents()
         end
 
         base.Touched:Connect(function()
-            if active then
+            if active and self._enabled then
                 active = false
                 for _, part in pairs (parts) do
                     tileTweens.Disppear[part]:Play()

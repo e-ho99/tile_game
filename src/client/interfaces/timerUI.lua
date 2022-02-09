@@ -16,7 +16,7 @@ function TimerUI.new()
     
     self:initEvents()
     self:updateTime(timerEvents.GetTime:InvokeServer())
-    self:updateStatus("intermission")
+    self:updateStatus(timerEvents.Parent.GetStatus:InvokeServer())
     return self
 end
 
