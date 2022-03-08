@@ -1,6 +1,8 @@
 Map = {}
 Map.__index = Map
 
+local events = game.ReplicatedStorage.shared.Events
+
 function Map:init(e)
     engine = e
 end
@@ -18,6 +20,8 @@ end
 function Map:loadMap()
     self._model = self._mapTemplate:Clone()
     self._model.Parent = workspace
+
+    events.GameEvents.SetMap:FireAllClients(self._name, self._model)
 end
 
 function Map:spawnPlayers(playerList, spawnType)
