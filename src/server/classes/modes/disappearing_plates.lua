@@ -14,8 +14,35 @@ function DisppearingPlates.new(map, participatingPlayers)
     self._name = "Disappearing Plates"
     self._roundTime = 60
     self._goalPlayerCount = 2
+    self._tiles = {}
 
     return self
+end
+
+function DisppearingPlates:initMapEvents()
+    self._tiles = self._map._model.Tiles:GetChildren()
+
+    for _, tile in pairs (self._tiles) do
+        
+    end
+end
+
+function DisppearingPlates:onGameTick()
+    local dT = self._roundTime - engine.services.timer_service._time -- time elapsed
+    local multiplier = math.ceil(dT / (self._roundTime / 6))
+    local amount = math.ceil(math.random(2, 6) * multiplier)
+
+    for i= 1, amount do
+        if #self._tiles > 0 then
+            local num = math.random(1, #self._tiles)
+            local selectedTile = self._tiles[num]
+            table.remove(self._tiles, num)
+
+            if selectedTile and selectedTile.PrimaryPart then
+                self:_rumbleAndDestroy(selectedTile)
+            end
+        end
+    end
 end
 
 function DisppearingPlates:eliminate(player)
@@ -34,41 +61,27 @@ function DisppearingPlates:eliminate(player)
     end
 end
 
-function DisppearingPlates:initMapEvents()
-    local tileTweens = {
-        ["Disppear"] = {},
-        ["Show"] = {}
-    }
+function DisppearingPlates:_rumbleAndDestroy(tile)
+    local origin = tile.PrimaryPart.Position
+    local dropDistance = 200
+    local riseDistance = 20
 
-    for _, tile in pairs (self._map._model.Tiles:GetChildren()) do
-        local base = tile.PrimaryPart
-        local parts = tile:GetChildren()
-        local active = true
+    -- rise
+    for i = 1, riseDistance do
+        tile:PivotTo(CFrame.new(origin + Vector3.new(0, i / 10, 0)))
+        task.wait(.025)    
+    end
 
-        for _, part in pairs (parts) do
-            local disappear = TweenService:Create(part, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0), {["Transparency"] = 1})
-            disappear.Completed:Connect(function()
-                part.CanCollide = false
-            end)
-
-            local show = TweenService:Create(part, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0), {["Transparency"] = 0})
-            tileTweens.Disppear[part] = disappear
-            tileTweens.Show[part] = show
+    -- drop
+    for i = 1, dropDistance do
+        if tile and tile.PrimaryPart then
+            tile:PivotTo(CFrame.new(tile.PrimaryPart.Position + Vector3.new(0, -1, 0)))
+            task.wait(.025)    
         end
+    end
 
-        base.Touched:Connect(function()
-            if active and self._enabled then
-                active = false
-                for _, part in pairs (parts) do
-                    tileTweens.Disppear[part]:Play()
-                    task.wait(5)
-                    part.CanCollide = true
-                    tileTweens.Show[part]:Play()
-                end
-                task.wait(1)
-                active = true
-            end
-        end) 
+    if tile then
+        tile:Destroy()
     end
 end
 
