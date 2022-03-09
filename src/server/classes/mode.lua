@@ -1,6 +1,8 @@
 Mode = {}
 Mode.__index = Mode
 
+local events = game.ReplicatedStorage.shared.Events
+
 function Mode:init(e)
     engine = e
 end
@@ -54,6 +56,13 @@ function Mode:roundComplete()
     return self._currentRound == self._roundTotal
 end
 
+function Mode:Destroy()
+    for _, e in pairs (self._events) do
+        e:Disconnect()
+    end
+end
+
+--[[ GETTERS ]]--
 function Mode:getPlayerModeData(participatingPlayers)
     -- overwritten with each mode as tracked data can vary; defaults to players who survive --
     local data = {}
@@ -69,15 +78,6 @@ function Mode:getPlayerModeData(participatingPlayers)
     end
 
     return data
-end
-
-function Mode:respawnPlayers()
-    -- respawn players who need to; defaults to using "Active" key in player's mode data
-    for player, modeData in pairs(self._playerModeData) do
-        if player and modeData["Active"] then
-            player:LoadCharacter()
-        end
-    end    
 end
 
 function Mode:getWinners()
@@ -100,33 +100,11 @@ function Mode:getWinners()
     return winners, winnersString
 end
 
-function Mode:freezePlayers(playerList)
-    for _, player in pairs(playerList) do
-        if player then
-            local c = player.Character or player.CharacterAdded:Wait()
-            c.Humanoid.WalkSpeed = 0
-            c.Humanoid.JumpPower = 0
-        end
-    end
-end
-
-function Mode:thawPlayers(playerList)
-    for _, player in pairs(playerList) do
-        if player then
-            local c = player.Character
-            c.Humanoid.WalkSpeed = self._walkSpeed or 16
-            c.Humanoid.JumpPower = self._jumpPower or 50
-        end
-    end
-end
-
-function Mode:Destroy()
-    for _, e in pairs (self._events) do
-        e:Disconnect()
-    end
-end
-
 --[[ EVENTS ]]--
+function Mode:onGameTick()
+    -- fires on every game tick; depends on game_service timerTick event --
+end
+
 function Mode:initCountdownEvents(playerList)
     for _, player in pairs (playerList) do
         local event = player.CharacterAdded:Connect(function()
@@ -142,6 +120,7 @@ function Mode:initCountdownEvents(playerList)
 end
 
 function Mode:initPlayerEvents(playerList)
+    print("PLAYER EVENTS")
     for _, player in pairs (playerList) do
         local c = player.Character
 
@@ -162,6 +141,40 @@ function Mode:initPlayerEvents(playerList)
     end
 end
 
+function Mode:initMapEvents()
+    -- initializes events dependent on map obj/model --
+end
+
+--[[ MISC ]]--
+function Mode:respawnPlayers()
+    -- respawn players who need to; defaults to using "Active" key in player's mode data
+    for player, modeData in pairs(self._playerModeData) do
+        if player and modeData["Active"] then
+            player:LoadCharacter()
+        end
+    end    
+end
+
+function Mode:freezePlayers(playerList)
+    for _, player in pairs(playerList) do
+        if player then
+            local c = player.Character or player.CharacterAdded:Wait()
+            c.Humanoid.WalkSpeed = 0
+            c.Humanoid.JumpPower = 0
+        end
+    end
+end
+
+function Mode:thawPlayers(playerList)
+    for _, player in pairs(playerList) do
+        if player then
+            local c = player.Character
+            c.Humanoid.WalkSpeed = self._walkSpeed or 16
+            c.Humanoid.JumpPower = self._jumpPower or 50
+        end
+    end
+end
+
 function Mode:_countActivePlayers()
     local count = 0
 
@@ -172,6 +185,61 @@ function Mode:_countActivePlayers()
     end
 
     return count
+end
+
+--[[ TILE EVENTS ]]--
+function Mode:_initTileEnteredEvent()
+    -- sets up tile entered event to be called from client/filters illogical requests --
+    local entered = events.GameEvents.TileEvents.TileEntered.OnServerEvent:Connect(function(player, tile)
+        if self._enabled then
+            -- verify that player position within range of tile --
+            local character = player.Character
+
+            if character and tile then
+                local distance = (character.HumanoidRootPart.Position - tile.PrimaryPart.Position).magnitude
+
+                if distance < 20 then
+                    self:_onTileEntered(player, tile)
+                end
+            end
+        end
+    end)
+
+    local exited = events.GameEvents.TileEvents.TileEntered.OnServerEvent:Connect(function(player, tile)
+        if self._enabled then
+            -- verify that player position within range of tile --
+            local character = player.Character
+
+            if character and tile then
+                self:_onTileExited(player, tile)
+            end
+        end
+    end)
+
+    table.insert(self._events, entered)
+end
+
+function Mode:_initTileExitedEvent()
+    -- sets up tile exited event to be called from client --
+    local exited = events.GameEvents.TileEvents.TileExited.OnServerEvent:Connect(function(player, tile)
+        local character = player.Character
+
+        if character and tile then
+            self:_onTileExited(player, tile)
+        end
+    end)
+
+    table.insert(self._events, exited)
+end
+
+function Mode:_onTileEntered(player, tile)
+    -- overwritten by game modes as what is done varies between modes -- 
+    -- print(player, "entered tile", tile)
+end
+
+function Mode:_onTileExited(player, tile)
+    -- overwritten by game modes as what is done varies between modes -- 
+    -- print(player, "exited tile", tile)
 end
 
 return Mode

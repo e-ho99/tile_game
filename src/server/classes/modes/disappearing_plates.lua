@@ -3,6 +3,7 @@ DisppearingPlates.__index = DisppearingPlates
 
 local TweenService = game:GetService("TweenService")
 local timerEvents = game.ReplicatedStorage.shared.Events.TimerEvents
+local events = game.ReplicatedStorage.shared.Events
 
 function DisppearingPlates:init(e)
     engine = e
@@ -22,9 +23,14 @@ end
 function DisppearingPlates:initMapEvents()
     self._tiles = self._map._model.Tiles:GetChildren()
 
-    for _, tile in pairs (self._tiles) do
-        
+    for _, player in pairs(self._participatingPlayers) do
+        if player then
+            events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
+        end
     end
+
+    self:_initTileEnteredEvent()
+    self:_initTileExitedEvent()
 end
 
 function DisppearingPlates:onGameTick()
@@ -39,7 +45,7 @@ function DisppearingPlates:onGameTick()
             table.remove(self._tiles, num)
 
             if selectedTile and selectedTile.PrimaryPart then
-                self:_rumbleAndDestroy(selectedTile)
+                self:_rumbleAndDestroy(selectedTile, num)
             end
         end
     end
@@ -64,12 +70,13 @@ end
 function DisppearingPlates:_rumbleAndDestroy(tile)
     local origin = tile.PrimaryPart.Position
     local dropDistance = 200
-    local riseDistance = 20
+    local riseDistance = 2
+    local riseTime = 1.5
 
     -- rise
-    for i = 1, riseDistance do
+    for i = 1, riseDistance * 10 do
         tile:PivotTo(CFrame.new(origin + Vector3.new(0, i / 10, 0)))
-        task.wait(.025)    
+        task.wait(riseTime / (riseDistance * 10))   
     end
 
     -- drop
@@ -82,6 +89,16 @@ function DisppearingPlates:_rumbleAndDestroy(tile)
 
     if tile then
         tile:Destroy()
+    end
+end
+
+function DisppearingPlates:_onTileEntered(player, tile)
+    local index = table.find(self._tiles, tile)
+    print(index)
+
+    if index then
+        table.remove(self._tiles, index)
+        self:_rumbleAndDestroy(tile)
     end
 end
 

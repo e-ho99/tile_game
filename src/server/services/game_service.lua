@@ -2,6 +2,7 @@ GameService = {}
 GameService.__index = GameService
 
 local sharedEvents = game.ReplicatedStorage.shared.Events
+local gameEvents = sharedEvents.GameEvents
 
 function GameService:init(e)
     engine = e
@@ -31,10 +32,26 @@ function GameService:initEvents()
 
         for i, p in pairs (self._participatingPlayers) do
             if p == player then
-                table.remove(self._participatingPlayer, i)
+                table.remove(self._participatingPlayers, i)
             end
         end
     end)
+
+    gameEvents.GetMap.OnServerInvoke = function()
+        if self._map then
+            return self._map._name, self._map._model
+        else
+            return "", nil
+        end
+    end
+
+    gameEvents.GetMode.OnServerInvoke = function()
+        if self._mode then
+            return self._mode._name
+        else
+            return ""
+        end
+    end
 
     sharedEvents.GetStatus.OnServerInvoke = function()
         return self._status
@@ -60,6 +77,8 @@ function GameService:clear()
     self._participatingPlayers = {}
 
     self._map, self._mode = nil, nil
+    gameEvents.SetMap:FireAllClients("", nil)
+    gameEvents.SetMode:FireAllClients("")
 
     print("Cleaned up game service flow")
 end
@@ -68,7 +87,7 @@ function GameService:selectMap()
     local mapName = engine.services.map_service:selectMap()
     local map = engine.maps[mapName]
     self._map = map.new()
-
+    
     print("Selected map:", mapName)
 end
 
@@ -78,6 +97,7 @@ function GameService:selectMode(map)
     local mode = engine.modes[modeName]
     self._mode = mode.new(map, game.Players:GetPlayers())
 
+    gameEvents.SetMode:FireAllClients(modeName)
     print("Selected mode:", modeName)
 end
 
@@ -90,7 +110,7 @@ end
 function GameService:toIntermission()
     self._status = "Intermission"
     sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
-    engine.services.timer_service:enable(10)
+    engine.services.timer_service:enable(10) --engine.services.timer_service:enable(10)
 end
 
 function GameService:toGameSelect()
@@ -116,7 +136,7 @@ end
 function GameService:toCountdown()
     self._status = "Countdown"
     sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
-    engine.services.timer_service:enable(10)
+    engine.services.timer_service:enable(5)
 end
 
 function GameService:toPlaying()
@@ -140,6 +160,10 @@ end
 --[[ Timer Events ]]--
 function GameService:timerTick()
     -- fires every time timer is updated (1s) -- 
+    if self._status == "Playing" then
+        self._mode:onGameTick()    
+    end
+
     print("Timer tick")
 end
 
