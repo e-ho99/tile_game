@@ -73,7 +73,6 @@ function DisppearingPlates:_rumbleAndDestroy(tile)
     local dropDistance = 100
     local riseDistance = 3
     local riseTime = (1.5 - ((self._elapsedTime / (self._roundTime - 10)) * .75))
-    print(riseTime)
     
     -- rise
     for i = 1, riseDistance * 10 do
