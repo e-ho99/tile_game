@@ -44,6 +44,11 @@ end
 
 function Mode:startRound()
     self._enabled = true
+
+    for player, data in pairs(self._playerModeData) do
+        events.GameEvents.ModeEvents.ModeEnabled:FireClient(player)
+    end
+
     engine.services.timer_service:enable(self._roundTime)
     self._currentRound = self._currentRound + 1
     self:thawPlayers(self._participatingPlayers)

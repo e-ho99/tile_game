@@ -16,6 +16,7 @@ function DisppearingPlates.new(map, participatingPlayers)
     self._roundTime = 60
     self._goalPlayerCount = 2
     self._tiles = {}
+    self._elapsedTime = 0
 
     return self
 end
@@ -34,8 +35,8 @@ function DisppearingPlates:initMapEvents()
 end
 
 function DisppearingPlates:onGameTick()
-    local dT = self._roundTime - engine.services.timer_service._time -- time elapsed
-    local multiplier = math.ceil(dT / (self._roundTime / 6))
+    self._elapsedTime = self._roundTime - engine.services.timer_service._time -- time elapsed
+    local multiplier = math.ceil(self._elapsedTime / (self._roundTime / 6))
     local amount = math.ceil(math.random(2, 6) * multiplier)
 
     for i= 1, amount do
@@ -69,10 +70,11 @@ end
 
 function DisppearingPlates:_rumbleAndDestroy(tile)
     local origin = tile.PrimaryPart.Position
-    local dropDistance = 200
-    local riseDistance = 2
-    local riseTime = 1.5
-
+    local dropDistance = 100
+    local riseDistance = 3
+    local riseTime = (1.5 - ((self._elapsedTime / (self._roundTime - 10)) * .75))
+    print(riseTime)
+    
     -- rise
     for i = 1, riseDistance * 10 do
         tile:PivotTo(CFrame.new(origin + Vector3.new(0, i / 10, 0)))
@@ -83,7 +85,7 @@ function DisppearingPlates:_rumbleAndDestroy(tile)
     for i = 1, dropDistance do
         if tile and tile.PrimaryPart then
             tile:PivotTo(CFrame.new(tile.PrimaryPart.Position + Vector3.new(0, -1, 0)))
-            task.wait(.025)    
+            task.wait()    
         end
     end
 

@@ -13,9 +13,10 @@ function TileRegionHandler.new(map)
     local self = setmetatable({}, TileRegionHandler)
     self._map = map
     self._regions = {}
-    self._active = false
+    self._enabled = false
     self._tiles = map.Tiles:GetChildren()
     self._tileStates = {}
+    self._events = {}
 
     self:_initializeTiles()
     self:onEnterLoop()
@@ -23,7 +24,65 @@ function TileRegionHandler.new(map)
     return self
 end
 
+function TileRegionHandler:onEnterLoop()
+    local mapChildren = self._map:GetDescendants()
+    local overlapParams = OverlapParams.new()
+    overlapParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character}
+    overlapParams.FilterType = Enum.RaycastFilterType.Whitelist
+    
+    local e = game:GetService("RunService").RenderStepped:Connect(function()
+        if self._enabled then
+            for _, tile in pairs (self._tiles) do
+                local base = tile.PrimaryPart
+                local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
+                
+                if #parts > 1 and not self._tileStates[tile].isEntered then -- on first entrance
+                    self._tileStates[tile].isEntered = true
+                    gameEvents.TileEvents.TileEntered:FireServer(tile)
+                elseif #parts < 1 and self._tileStates[tile].isEntered then -- on first exit
+                    self._tileStates[tile].isEntered = false
+                    gameEvents.TileEvents.TileExited:FireServer(tile)
+                end
+            end
+        end
+    end)
+
+    table.insert(self._events, e)
+    -- LOOPED VERSION IN CASE RENDERSTEPPED IS TOO EXPENSIVE --
+    -- while task.wait(.1) do
+        -- if self._enabled then
+        --     for _, tile in pairs (self._tiles) do
+        --         local base = tile.PrimaryPart
+        --         local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
+
+        --         if parts and #parts > 1 then
+        --             gameEvents.TileEvents.TileEntered:FireServer(tile)
+        --         end
+        --     end
+        -- end
+    -- end
+end
+
+function TileRegionHandler:enable()
+    self._enabled = true
+end
+
+function TileRegionHandler:disable()
+    self._enabled = false
+    self:_initializeTiles()
+end
+
+function TileRegionHandler:Destroy()
+    for _, event in pairs(self._events) do
+        event:Disconnect()
+    end
+
+    return nil
+end
+
 function TileRegionHandler:_initializeTiles()
+    self._tileStates = {} -- clearing out in case we make call again
+
     for _, tile in pairs (self._tiles) do
         -- initializing state of tile --
         local newState = {}
@@ -37,40 +96,6 @@ function TileRegionHandler:_initializeTiles()
         -- TODO: remove for release version
         self:_showRegion(tile)
     end
-end
-
-function TileRegionHandler:onEnterLoop()
-    local mapChildren = self._map:GetDescendants()
-    local overlapParams = OverlapParams.new()
-    overlapParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character}
-    overlapParams.FilterType = Enum.RaycastFilterType.Whitelist
-    
-    game:GetService("RunService").RenderStepped:Connect(function()
-        for _, tile in pairs (self._tiles) do
-            local base = tile.PrimaryPart
-            local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
-            
-            if #parts > 1 and not self._tileStates[tile].isEntered then -- on first entrance
-                self._tileStates[tile].isEntered = true
-                gameEvents.TileEvents.TileEntered:FireServer(tile)
-            elseif #parts < 1 and self._tileStates[tile].isEntered then -- on first exit
-                self._tileStates[tile].isEntered = false
-                gameEvents.TileEvents.TileExited:FireServer(tile)
-            end
-        end
-    end)
-
-    -- LOOPED VERSION IN CASE RENDERSTEPPED IS TOO EXPENSIVE --
-    -- while task.wait(.1) do
-    --     for _, tile in pairs (self._tiles) do
-    --         local base = tile.PrimaryPart
-    --         local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
-
-    --         if parts and #parts > 1 then
-    --             gameEvents.TileEvents.TileEntered:FireServer(tile)
-    --         end
-    --     end
-    -- end
 end
 
 function TileRegionHandler:_showRegion(tile)
