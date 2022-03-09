@@ -1,15 +1,96 @@
 TileRegionHandler = {}
 TileRegionHandler.__index = TileRegionHandler
 
+local gameEvents = game.ReplicatedStorage.shared.Events.GameEvents
+local TileStates = {["isEntered"] = false}
+
 function TileRegionHandler:init(e)
     engine = e
 end
 
 -- manages tile regions to calculate entering/leaving of tiles --
-function TileRegionHandler.new() 
+function TileRegionHandler.new(map) 
     local self = setmetatable({}, TileRegionHandler)
+    self._map = map
+    self._regions = {}
+    self._active = false
+    self._tiles = map.Tiles:GetChildren()
+    self._tileStates = {}
 
+    self:_initializeTiles()
+    self:onEnterLoop()
+    print("tile region handler created")
     return self
+end
+
+function TileRegionHandler:_initializeTiles()
+    for _, tile in pairs (self._tiles) do
+        -- initializing state of tile --
+        local newState = {}
+
+        for property, value in pairs(TileStates) do
+            newState[property] = value    
+        end
+
+        self._tileStates[tile] = newState
+        
+        -- TODO: remove for release version
+        self:_showRegion(tile)
+    end
+end
+
+function TileRegionHandler:onEnterLoop()
+    local mapChildren = self._map:GetDescendants()
+    local overlapParams = OverlapParams.new()
+    overlapParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character}
+    overlapParams.FilterType = Enum.RaycastFilterType.Whitelist
+    
+    game:GetService("RunService").RenderStepped:Connect(function()
+        for _, tile in pairs (self._tiles) do
+            local base = tile.PrimaryPart
+            local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
+            
+            if #parts > 1 and not self._tileStates[tile].isEntered then -- on first entrance
+                self._tileStates[tile].isEntered = true
+                gameEvents.TileEvents.TileEntered:FireServer(tile)
+            elseif #parts < 1 and self._tileStates[tile].isEntered then -- on first exit
+                self._tileStates[tile].isEntered = false
+                gameEvents.TileEvents.TileExited:FireServer(tile)
+            end
+        end
+    end)
+
+    -- LOOPED VERSION IN CASE RENDERSTEPPED IS TOO EXPENSIVE --
+    -- while task.wait(.1) do
+    --     for _, tile in pairs (self._tiles) do
+    --         local base = tile.PrimaryPart
+    --         local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
+
+    --         if parts and #parts > 1 then
+    --             gameEvents.TileEvents.TileEntered:FireServer(tile)
+    --         end
+    --     end
+    -- end
+end
+
+function TileRegionHandler:_showRegion(tile)
+    -- show bounds of tile for debugging purposes --
+    local base = tile.PrimaryPart
+    local halfX, halfZ = base.Size.X / 2, base.Size.Z / 2
+    local minBounds = (base.CFrame * CFrame.new(halfX, -100, halfZ)).Position
+    local maxBounds = (base.CFrame * CFrame.new(-halfX, 100, -halfZ)).Position
+    local p1 = Instance.new("Part", tile)
+    p1.Size = Vector3.new(1,1,1)
+    p1.Anchored = true
+    p1.CFrame = (base.CFrame * CFrame.new(halfX, 0, halfZ))
+    p1.BrickColor = BrickColor.new("Really red")
+    p1.Name = "P1"
+    local p2 = Instance.new("Part", tile)
+    p2.Size = Vector3.new(1,1,1)
+    p2.Anchored = true
+    p2.CFrame = (base.CFrame * CFrame.new(-halfX, 0, -halfZ))
+    p2.BrickColor = BrickColor.new("Really blue")
+    p2.Name = "P2"
 end
 
 return TileRegionHandler

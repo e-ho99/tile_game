@@ -1,6 +1,8 @@
 Mode = {}
 Mode.__index = Mode
 
+local events = game.ReplicatedStorage.shared.Events
+
 function Mode:init(e)
     engine = e
 end
@@ -118,6 +120,7 @@ function Mode:initCountdownEvents(playerList)
 end
 
 function Mode:initPlayerEvents(playerList)
+    print("PLAYER EVENTS")
     for _, player in pairs (playerList) do
         local c = player.Character
 
@@ -182,6 +185,61 @@ function Mode:_countActivePlayers()
     end
 
     return count
+end
+
+--[[ TILE EVENTS ]]--
+function Mode:_initTileEnteredEvent()
+    -- sets up tile entered event to be called from client/filters illogical requests --
+    local entered = events.GameEvents.TileEvents.TileEntered.OnServerEvent:Connect(function(player, tile)
+        if self._enabled then
+            -- verify that player position within range of tile --
+            local character = player.Character
+
+            if character and tile then
+                local distance = (character.HumanoidRootPart.Position - tile.PrimaryPart.Position).magnitude
+
+                if distance < 20 then
+                    self:_onTileEntered(player, tile)
+                end
+            end
+        end
+    end)
+
+    local exited = events.GameEvents.TileEvents.TileEntered.OnServerEvent:Connect(function(player, tile)
+        if self._enabled then
+            -- verify that player position within range of tile --
+            local character = player.Character
+
+            if character and tile then
+                self:_onTileExited(player, tile)
+            end
+        end
+    end)
+
+    table.insert(self._events, entered)
+end
+
+function Mode:_initTileExitedEvent()
+    -- sets up tile exited event to be called from client --
+    local exited = events.GameEvents.TileEvents.TileExited.OnServerEvent:Connect(function(player, tile)
+        local character = player.Character
+
+        if character and tile then
+            self:_onTileExited(player, tile)
+        end
+    end)
+
+    table.insert(self._events, exited)
+end
+
+function Mode:_onTileEntered(player, tile)
+    -- overwritten by game modes as what is done varies between modes -- 
+    -- print(player, "entered tile", tile)
+end
+
+function Mode:_onTileExited(player, tile)
+    -- overwritten by game modes as what is done varies between modes -- 
+    -- print(player, "exited tile", tile)
 end
 
 return Mode

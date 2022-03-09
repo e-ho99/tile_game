@@ -11,9 +11,10 @@ function GameServiceClient.new()
     local self = setmetatable({}, GameServiceClient)
     self._map, self._mapModel = gameEvents.GetMap:InvokeServer()
     self._mode = gameEvents.GetMode:InvokeServer()
+    self._regionHandler = nil
 
     self:initEvents()
-    
+
     print("Created Game Service Client")
     return self
 end
@@ -30,11 +31,9 @@ function GameServiceClient:initEvents()
         print("Client mode", self._mode)
     end)
 
-    gameEvents.InitTileRegions.OnClientEvent:Connect(function()
+    gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(events)
         if self._mapModel then
-            for _, tile in pairs (self._mapModel.Tiles) do
-                print(tile)
-            end
+            self._regionHandler = engine.handlers.tile_region_handler.new(self._mapModel)
         end
     end)
 end
