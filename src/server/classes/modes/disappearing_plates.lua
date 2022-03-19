@@ -71,14 +71,15 @@ end
 function DisppearingPlates:_rumbleAndDestroy(tile)
     local origin = tile.PrimaryPart.Position
     local dropDistance = 100
-    local riseDistance = 3
-    local riseTime = (1.5 - ((self._elapsedTime / (self._roundTime - 10)) * .75))
-    
-    -- rise
-    for i = 1, riseDistance * 10 do
-        tile:PivotTo(CFrame.new(origin + Vector3.new(0, i / 10, 0)))
-        task.wait(riseTime / (riseDistance * 10))   
+    local preDropDistance = 2
+
+    -- pre-drop
+    for i = 1, (preDropDistance * 10) / 2 do
+        tile:PivotTo(CFrame.new(origin - Vector3.new(0, i / 10, 0)))
+        task.wait(.05)   
     end
+    
+    task.wait(.5)
 
     -- drop
     for i = 1, dropDistance do

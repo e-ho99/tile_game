@@ -200,7 +200,7 @@ function Mode:_initTileEnteredEvent()
             -- verify that player position within range of tile --
             local character = player.Character
 
-            if character and tile then
+            if character and tile and tile.PrimaryPart then
                 local distance = (character.HumanoidRootPart.Position - tile.PrimaryPart.Position).magnitude
 
                 if distance < 20 then

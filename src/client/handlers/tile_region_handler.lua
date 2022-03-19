@@ -30,6 +30,7 @@ function TileRegionHandler:onEnterLoop()
     overlapParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character}
     overlapParams.FilterType = Enum.RaycastFilterType.Whitelist
     
+    print(overlapParams.FilterDescendantsInstances)
     local e = game:GetService("RunService").RenderStepped:Connect(function()
         if self._enabled then
             for _, tile in pairs (self._tiles) do
@@ -37,6 +38,7 @@ function TileRegionHandler:onEnterLoop()
                 local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
                 
                 if #parts > 1 and not self._tileStates[tile].isEntered then -- on first entrance
+                    print(parts)
                     self._tileStates[tile].isEntered = true
                     gameEvents.TileEvents.TileEntered:FireServer(tile)
                 elseif #parts < 1 and self._tileStates[tile].isEntered then -- on first exit
