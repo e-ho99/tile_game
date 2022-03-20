@@ -79,6 +79,7 @@ function GameService:clear()
     self._map, self._mode = nil, nil
     gameEvents.SetMap:FireAllClients("", nil)
     gameEvents.SetMode:FireAllClients("")
+    gameEvents.ClearGame:FireAllClients()
 
     print("Cleaned up game service flow")
 end

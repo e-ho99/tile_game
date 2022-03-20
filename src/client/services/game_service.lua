@@ -31,6 +31,18 @@ function GameServiceClient:initEvents()
         print("Client mode", self._mode)
     end)
 
+    gameEvents.ClearGame.OnClientEvent:Connect(function()
+        self._regionHandler = self._regionHandler:Destroy() -- sets _regionHandler to nil
+    end)
+
+    gameEvents.ModeEvents.ModeEnabled.OnClientEvent:Connect(function()
+        self._regionHandler:enable()
+    end)
+
+    gameEvents.ModeEvents.ModeDisabled.OnClientEvent:Connect(function()
+        self._regionHandler:disable()
+    end)
+
     gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(events)
         if self._mapModel then
             self._regionHandler = engine.handlers.tile_region_handler.new(self._mapModel)
