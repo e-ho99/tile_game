@@ -75,16 +75,16 @@ function DisppearingPlates:_rumbleAndDestroy(tile)
 
     -- pre-drop
     for i = 1, (preDropDistance * 10) / 2 do
-        tile:PivotTo(CFrame.new(origin - Vector3.new(0, i / 10, 0)))
+        tile:PivotTo(tile:GetPivot() * CFrame.new(0, -.1, 0))
         task.wait(.05)   
     end
     
-    task.wait(.5)
+    task.wait(1)
 
     -- drop
     for i = 1, dropDistance do
         if tile and tile.PrimaryPart then
-            tile:PivotTo(CFrame.new(tile.PrimaryPart.Position + Vector3.new(0, -1, 0)))
+            tile:PivotTo(tile:GetPivot() * CFrame.new(0, -1, 0))
             task.wait()    
         end
     end
