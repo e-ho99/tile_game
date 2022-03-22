@@ -19,7 +19,7 @@ function Mode.new(map, participatingPlayers)
     self._enabled = false
     self._hints = {}
     self._participatingPlayers = participatingPlayers
-    self._playerModeData = self:getPlayerModeData(participatingPlayers)
+    self._playerModeData = self:_getPlayerModeData(participatingPlayers)
     self._events = {}
 
     self:initCountdownEvents(participatingPlayers)
@@ -68,23 +68,6 @@ function Mode:Destroy()
 end
 
 --[[ GETTERS ]]--
-function Mode:getPlayerModeData(participatingPlayers)
-    -- overwritten with each mode as tracked data can vary; defaults to players who survive --
-    local data = {}
-
-    for _, player in pairs(participatingPlayers) do
-        local modeData = {}
-
-        for key, val in pairs (self._modeData) do
-            modeData[key] = val
-        end
-
-        data[player] = modeData
-    end
-
-    return data
-end
-
 function Mode:getWinners()
     -- overwritten with each mode as tracked data can vary; defaults to players who survive --
     local winners = {["Players"] = {}, ["Ordered"] = false}
@@ -103,6 +86,23 @@ function Mode:getWinners()
     end
 
     return winners, winnersString
+end
+
+function Mode:_getPlayerModeData(participatingPlayers)
+    -- overwritten with each mode as tracked data can vary; defaults to players who survive --
+    local data = {}
+
+    for _, player in pairs(participatingPlayers) do
+        local modeData = {}
+
+        for key, val in pairs (self._modeData) do
+            modeData[key] = val
+        end
+
+        data[player] = modeData
+    end
+
+    return data
 end
 
 --[[ EVENTS ]]--
