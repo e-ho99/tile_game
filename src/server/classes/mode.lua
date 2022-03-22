@@ -202,8 +202,9 @@ function Mode:_initTileEnteredEvent()
 
             if character and tile and tile.PrimaryPart then
                 local distance = (character.HumanoidRootPart.Position - tile.PrimaryPart.Position).magnitude
+                local yDifference = math.abs(character.HumanoidRootPart.Position.Y - tile.PrimaryPart.Position.Y)
 
-                if distance < 20 then
+                if distance < 20 or yDifference > 20 then
                     self:_onTileEntered(player, tile)
                 end
             end

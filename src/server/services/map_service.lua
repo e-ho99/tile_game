@@ -18,7 +18,7 @@ function MapService.new()
 end
 
 function MapService:selectMap()
-    local map = self._mapNames[math.random(1, #self._mapNames)]
+    local map = self._mapNames[table.find(self._mapNames, "toy field")]--self._mapNames[math.random(1, #self._mapNames)]
     return map
 end
 
@@ -36,7 +36,8 @@ function MapService:gatherData()
             
         if mapObj then
             mapObj = mapObj.new()
-            table.insert(self._mapNames, map)
+            local map = mapObj._name
+            table.insert(self._mapNames, mapObj._name) -- adds presented name (without _'s)
             self._mapToModes[map] = mapObj._modes
             
             for _, mode in pairs(mapObj._modes) do

@@ -35,7 +35,7 @@ function TileRegionHandler:onEnterLoop()
         if self._enabled then
             for _, tile in pairs (self._tiles) do
                 local base = tile.PrimaryPart
-                local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
+                local parts = workspace:GetPartBoundsInBox(base.CFrame * CFrame.new(0, 100 + (base.Size.Y / 2), 0), Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
                 
                 if #parts > 1 and not self._tileStates[tile].isEntered then -- on first entrance
                     print(parts)
@@ -104,18 +104,18 @@ function TileRegionHandler:_showRegion(tile)
     -- show bounds of tile for debugging purposes --
     local base = tile.PrimaryPart
     local halfX, halfZ = base.Size.X / 2, base.Size.Z / 2
-    local minBounds = (base.CFrame * CFrame.new(halfX, -100, halfZ)).Position
-    local maxBounds = (base.CFrame * CFrame.new(-halfX, 100, -halfZ)).Position
+    local minBounds = (base.CFrame * CFrame.new(halfX, -1 + (base.Size.Y / 2), halfZ)).Position
+    local maxBounds = (base.CFrame * CFrame.new(-halfX, 199 + (base.Size.Y / 2), -halfZ)).Position
     local p1 = Instance.new("Part", tile)
     p1.Size = Vector3.new(1,1,1)
     p1.Anchored = true
-    p1.CFrame = (base.CFrame * CFrame.new(halfX, 0, halfZ))
+    p1.CFrame = CFrame.new(minBounds)
     p1.BrickColor = BrickColor.new("Really red")
     p1.Name = "P1"
     local p2 = Instance.new("Part", tile)
     p2.Size = Vector3.new(1,1,1)
     p2.Anchored = true
-    p2.CFrame = (base.CFrame * CFrame.new(-halfX, 0, -halfZ))
+    p2.CFrame = CFrame.new(maxBounds)
     p2.BrickColor = BrickColor.new("Really blue")
     p2.Name = "P2"
 end

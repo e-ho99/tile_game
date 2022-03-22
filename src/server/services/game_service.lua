@@ -86,6 +86,7 @@ end
 
 function GameService:selectMap()
     local mapName = engine.services.map_service:selectMap()
+    mapName = mapName:gsub(" ", "_"):lower()
     local map = engine.maps[mapName]
     self._map = map.new()
     
