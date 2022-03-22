@@ -1,27 +1,31 @@
-TimerUI = {}
-TimerUI.__index = TimerUI
+ColorRunUI = {}
+ColorRunUI.__index = ColorRunUI
 
-local timerEvents = game.ReplicatedStorage.shared.Events.TimerEvents
+local modeEvents = game.ReplicatedStorage.shared.Events.GameEvents.ModeEvents
 
-function TimerUI:init(e)
+function ColorRunUI:init(e)
     engine = e
-    setmetatable(TimerUI, engine.interfaces.gui)
+    setmetatable(ColorRunUI, engine.interfaces.gui)
 end
 
-function TimerUI.new()
-    local self = setmetatable(engine.interfaces.gui.new(script.Name), TimerUI)
-
-    self._time = 0
-    self._timeLength = timerEvents.GetTimeLength:InvokeServer()
+function ColorRunUI.new()
+    local self = setmetatable(engine.interfaces.gui.new(script.Name), ColorRunUI)
     
     self:initEvents()
-    self:updateTime(timerEvents.GetTime:InvokeServer())
-    self:updateStatus(timerEvents.Parent.GetStatus:InvokeServer())
+
     return self
 end
 
-function TimerUI:initEvents()
- 
+function ColorRunUI:initEvents()
+    local e = modeEvents.UpdateScore.OnClientEvent:Connect(function(team, newScore)
+        local teamFrame = self._gui.Frame:FindFirstChild(team)
+
+        if teamFrame then
+            teamFrame.Score.Text = newScore
+        end
+    end)
+
+    table.insert(self._events, e)
 end
 
-return TimerUI
+return ColorRunUI

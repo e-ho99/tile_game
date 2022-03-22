@@ -37,9 +37,11 @@ function Mode:eliminate(player)
     if data and data["Active"] then
         data["Alive"] = false
         data["Active"] = false
-
+        
         print("Eliminated", player)
     end
+
+    events.GameEvents.ModeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
 end
 
 function Mode:startRound()
@@ -64,6 +66,10 @@ end
 function Mode:Destroy()
     for _, e in pairs (self._events) do
         e:Disconnect()
+    end
+
+    for player, data in pairs (self._playerModeData) do
+        events.GameEvents.ModeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
     end
 end
 
@@ -143,6 +149,7 @@ function Mode:initPlayerEvents(playerList)
         end)
 
         table.insert(self._events, event)
+        events.GameEvents.ModeEvents.ShowUI:FireClient(player, self._name:gsub("_", " "):lower())
     end
 end
 

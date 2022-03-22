@@ -1,9 +1,8 @@
 ColorRun = {}
 ColorRun.__index = ColorRun
 
-local TweenService = game:GetService("TweenService")
-local timerEvents = game.ReplicatedStorage.shared.Events.TimerEvents
 local events = game.ReplicatedStorage.shared.Events
+local modeEvents = events.GameEvents.ModeEvents
 
 function ColorRun:init(e)
     engine = e
@@ -60,8 +59,45 @@ function ColorRun:initPlayerEvents(playerList)
         end)
         
         self:_assignTeam(player, i)
+        events.GameEvents.ModeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())
         table.insert(self._events, event)
     end
+end
+
+function ColorRun:getWinners()
+    local winners = {["Players"] = {}, ["Ordered"] = false}
+    local winnersString = ""
+    local winningTeam = self:_getWinningTeam()
+
+    for player, modeData in pairs(self._playerModeData) do
+        if modeData.Team == winningTeam then
+            print(player)
+            if winnersString == "" then
+                winnersString = player.Name
+            else
+                winnersString = winnersString .. player.Name
+            end
+            
+            table.insert(winners.Players, player)
+        end
+    end
+
+    return winners, winnersString
+end
+
+function ColorRun:_getWinningTeam()
+    local winner = "Bright blue"
+    local max = 0
+
+    for team, score in pairs (self._score) do
+        if score > max then
+            winner = team
+            max = score
+        end
+    end
+
+    print("Winner", winner, max)
+    return BrickColor.new(winner)
 end
 
 function ColorRun:_assignTeam(player, index)
@@ -76,10 +112,6 @@ function ColorRun:_assignTeam(player, index)
     end
 
     self._playerModeData[player].Team = team
-end
-
-function ColorRun:onGameTick()
-    
 end
 
 function ColorRun:_initTileOwnership(map)
@@ -99,11 +131,14 @@ function ColorRun:_onTileEntered(player, tile)
             print("Claim tile", self._score)
             self._tileOwnership[tile] = color
             self._score[color.Name] = self._score[color.Name] + 1 
-
+            
             if currentColor then
                 self._score[currentColor.Name] = self._score[currentColor.Name] - 1
+                modeEvents.UpdateScore:FireAllClients(currentColor.Name, self._score[currentColor.Name])
             end  
 
+            modeEvents.UpdateScore:FireAllClients(color.Name, self._score[color.Name])
+            
             for _, child in pairs (tile:GetDescendants()) do
                 if child:IsA("BasePart") or child:IsA("UnionOperation") then
                     child.BrickColor = color
