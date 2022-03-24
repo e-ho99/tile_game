@@ -16,9 +16,7 @@ function WinnersUI.new()
 end
 
 function WinnersUI:initEvents()
-    gameEvents.SendWinners.OnClientEvent:Connect(function(winners)
-        print("SHOW WINNERS")
-
+    local e = gameEvents.SendWinners.OnClientEvent:Connect(function(winners)
         if winners == "" then
             winners = "No winners"
         end
@@ -30,6 +28,8 @@ function WinnersUI:initEvents()
 
         self._gui.Enabled = false
     end)
+
+    table.insert(self._events, e)
 end
 
 return WinnersUI

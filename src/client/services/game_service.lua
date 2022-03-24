@@ -43,6 +43,14 @@ function GameServiceClient:initEvents()
         self._regionHandler:disable()
     end)
 
+    gameEvents.ModeEvents.ShowUI.OnClientEvent:Connect(function(mode)
+        engine.services.interface_service:addGui(mode .. "UI", true)
+    end)
+
+    gameEvents.ModeEvents.RemoveUI.OnClientEvent:Connect(function(mode)
+        engine.services.interface_service:removeGui(mode .. "UI")
+    end)
+
     gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(events)
         if self._mapModel then
             self._regionHandler = engine.handlers.tile_region_handler.new(self._mapModel)

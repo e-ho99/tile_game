@@ -7,7 +7,7 @@ local manifest = {
     {
         ['objType'] = 'services',
         ['folderName'] = "services", -- checks game.ReplicatedStorage.Common & game.ServerScriptService.Server
-        ['priority'] = {"game_service"}
+        ['priority'] = {"data_service", "game_service"}
     },
     {
         ['objType'] = 'handlers',

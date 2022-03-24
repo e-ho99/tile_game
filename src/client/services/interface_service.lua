@@ -41,6 +41,17 @@ function InterfaceService:addGui(guiName, enabled)
     end
 end
 
+function InterfaceService:removeGui(guiName)
+    local gui = self._playerGuis[guiName]
+
+    if gui then
+        gui:Destroy()
+        self._playerGuis[guiName] = nil
+    else
+        warn("Could not find gui,", guiName)
+    end
+end
+
 function InterfaceService:getGui(guiName)
     local findGui = self._playerGuis[guiName]
 
