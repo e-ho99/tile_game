@@ -45,12 +45,10 @@ function GameServiceClient:initEvents()
 
     gameEvents.ModeEvents.ShowUI.OnClientEvent:Connect(function(mode)
         engine.services.interface_service:addGui(mode .. "UI", true)
-        print("Show UI")
     end)
 
     gameEvents.ModeEvents.RemoveUI.OnClientEvent:Connect(function(mode)
         engine.services.interface_service:removeGui(mode .. "UI")
-        print("REMOVE UI")
     end)
 
     gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(events)
