@@ -49,7 +49,7 @@ function PlayerDataHandler:_initData()
 end
 
 function PlayerDataHandler:_initFolder()
-    local folder = script.PlayerData:Clone()
+    local folder = game.ServerStorage.PlayerData:Clone()
     folder.Parent = self._player 
 
     return folder

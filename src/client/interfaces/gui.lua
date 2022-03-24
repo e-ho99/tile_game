@@ -7,7 +7,7 @@ end
 
 function Gui.new(guiName) -- accepts script as argument to locate physical gui obj
     local self = setmetatable({}, Gui)
-    self._gui = game.ReplicatedStorage.interfaces:FindFirstChild(guiName)
+    self._gui = game.ReplicatedStorage.interfaces:FindFirstChild(guiName):Clone()
     self._events = {}
 
     return self
@@ -22,7 +22,6 @@ function Gui:disable()
 end
 
 function Gui:addGui()
-    self._gui = self._gui:Clone()
     self._gui.Parent = game.Players.LocalPlayer.PlayerGui
     self._gui.Enabled = false
     

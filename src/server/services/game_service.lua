@@ -18,7 +18,7 @@ function GameService.new()
     self._participatingPlayers = {} -- list of Player obj
 
     self._minimumPlayers = 1
-    self._intermissionTime = 15
+    self._intermissionTime = 120
 
     self:initEvents()
     print("Created Game Service")
