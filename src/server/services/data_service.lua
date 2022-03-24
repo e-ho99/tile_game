@@ -34,7 +34,7 @@ function DataService:_initData(player)
     dataHandlers.PlayerData = engine.handlers.player_data_handler.new(player, self._dataStores.PlayerData)
 
     self._dataHandlers[player] = dataHandlers
-    print(self._dataHandlers)
+
     print("Initialized data handlers for", player)
 end
 
