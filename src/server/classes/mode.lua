@@ -2,6 +2,7 @@ Mode = {}
 Mode.__index = Mode
 
 local events = game.ReplicatedStorage.shared.Events
+local modeEvents = events.GameEvents.ModeEvents
 
 function Mode:init(e)
     engine = e
@@ -41,14 +42,15 @@ function Mode:eliminate(player)
         print("Eliminated", player)
     end
 
-    events.GameEvents.ModeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
+    modeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
+    modeEvents.PlayerEliminated:FireAllClients(player)
 end
 
 function Mode:startRound()
     self._enabled = true
 
     for player, data in pairs(self._playerModeData) do
-        events.GameEvents.ModeEvents.ModeEnabled:FireClient(player)
+        modeEvents.ModeEnabled:FireClient(player)
     end
 
     engine.services.timer_service:enable(self._roundTime)
@@ -69,7 +71,7 @@ function Mode:Destroy()
     end
 
     for player, data in pairs (self._playerModeData) do
-        events.GameEvents.ModeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
+        modeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
     end
 end
 
@@ -131,7 +133,6 @@ function Mode:initCountdownEvents(playerList)
 end
 
 function Mode:initPlayerEvents(playerList)
-    print("PLAYER EVENTS")
     for _, player in pairs (playerList) do
         local c = player.Character
 
@@ -149,7 +150,7 @@ function Mode:initPlayerEvents(playerList)
         end)
 
         table.insert(self._events, event)
-        events.GameEvents.ModeEvents.ShowUI:FireClient(player, self._name:gsub("_", " "):lower())
+        modeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())
     end
 end
 

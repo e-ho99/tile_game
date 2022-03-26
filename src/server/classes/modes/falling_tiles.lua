@@ -1,18 +1,18 @@
-DisappearingPlates = {}
-DisappearingPlates.__index = DisappearingPlates
+FallingTiles = {}
+FallingTiles.__index = FallingTiles
 
 local TweenService = game:GetService("TweenService")
 local timerEvents = game.ReplicatedStorage.shared.Events.TimerEvents
 local events = game.ReplicatedStorage.shared.Events
 
-function DisappearingPlates:init(e)
+function FallingTiles:init(e)
     engine = e
-    setmetatable(DisappearingPlates, engine.classes.mode)
+    setmetatable(FallingTiles, engine.classes.mode)
 end
 
-function DisappearingPlates.new(map, participatingPlayers)
-    local self =  setmetatable(engine.classes.mode.new(map, participatingPlayers), DisappearingPlates)
-    self._name = "Disappearing Plates"
+function FallingTiles.new(map, participatingPlayers)
+    local self =  setmetatable(engine.classes.mode.new(map, participatingPlayers), FallingTiles)
+    self._name = "Falling Tiles"
     self._roundTime = 60
     self._goalPlayerCount = 2
     self._tiles = {}
@@ -21,7 +21,7 @@ function DisappearingPlates.new(map, participatingPlayers)
     return self
 end
 
-function DisappearingPlates:initMapEvents()
+function FallingTiles:initMapEvents()
     self._tiles = self._map._model.Tiles:GetChildren()
 
     for _, player in pairs(self._participatingPlayers) do
@@ -34,7 +34,7 @@ function DisappearingPlates:initMapEvents()
     self:_initTileExitedEvent()
 end
 
-function DisappearingPlates:onGameTick()
+function FallingTiles:onGameTick()
     self._elapsedTime = self._roundTime - engine.services.timer_service._time -- time elapsed
     local multiplier = math.ceil(self._elapsedTime / (self._roundTime / 6))
     local amount = math.ceil(math.random(2, 6) * multiplier)
@@ -52,7 +52,7 @@ function DisappearingPlates:onGameTick()
     end
 end
 
-function DisappearingPlates:eliminate(player)
+function FallingTiles:eliminate(player)
     -- handles elimination of player; defaults to elimination on first death --
     local data = self._playerModeData[player]
 
@@ -68,7 +68,7 @@ function DisappearingPlates:eliminate(player)
     end
 end
 
-function DisappearingPlates:_rumbleAndDestroy(tile)
+function FallingTiles:_rumbleAndDestroy(tile)
     local origin = tile.PrimaryPart.Position
     local dropDistance = 100
     local preDropDistance = 2
@@ -94,7 +94,7 @@ function DisappearingPlates:_rumbleAndDestroy(tile)
     end
 end
 
-function DisappearingPlates:_onTileEntered(player, tile)
+function FallingTiles:_onTileEntered(player, tile)
     local index = table.find(self._tiles, tile)
     print(index)
 
@@ -104,4 +104,4 @@ function DisappearingPlates:_onTileEntered(player, tile)
     end
 end
 
-return DisappearingPlates
+return FallingTiles
