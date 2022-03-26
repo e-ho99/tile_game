@@ -18,10 +18,10 @@ end
 
 function ColorRunUI:initEvents()
     local e = modeEvents.UpdateScore.OnClientEvent:Connect(function(team, newScore)
-        local teamFrame = self._gui.Frame:FindFirstChild(team)
+        local teamFrame = self._gui.Frame:FindFirstChild(team, true)
 
         if teamFrame then
-            teamFrame.Score.Text = newScore
+            teamFrame.Holder.Score.Text = newScore
         end
     end)
 
