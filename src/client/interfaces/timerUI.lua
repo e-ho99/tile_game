@@ -30,17 +30,17 @@ function TimerUI:initEvents()
     end)
 
     timerEvents.SetStatus.OnClientEvent:Connect(function(newStatus)
-        self._gui.Frame.Type.Text = newStatus
+        self._gui.Frame.Frame.Type.Text = newStatus
     end)
 end
 
 function TimerUI:updateTime(newTime)
-    self._gui.Frame.Time.Text = tostring(newTime)
+    self._gui.Frame.Frame.Time.Text = tostring(newTime)
     self._time = newTime
 end
 
 function TimerUI:updateStatus(newStatus)
-    self._gui.Frame.Type.Text = tostring(newStatus)
+    self._gui.Frame.Frame.Type.Text = tostring(newStatus)
 end
 
 return TimerUI
