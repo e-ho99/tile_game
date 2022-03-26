@@ -18,7 +18,7 @@ function GameService.new()
     self._participatingPlayers = {} -- list of Player obj
 
     self._minimumPlayers = 1
-    self._intermissionTime = 120
+    self._intermissionTime = 30
 
     self:initEvents()
     print("Created Game Service")
@@ -131,7 +131,8 @@ function GameService:toLoading()
     self._map:loadMap()
     self._mode:initMapEvents()
     self._mode:initPlayerEvents(self._participatingPlayers)
-    task.wait(1)
+    gameEvents.SendPlayers:FireAllClients(self._participatingPlayers)
+    task.wait(1.5)
     self._map:spawnPlayers(self._participatingPlayers, "random")
     self._mode:freezePlayers(self._participatingPlayers)
     self:toCountdown()
