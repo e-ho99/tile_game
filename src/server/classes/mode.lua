@@ -23,7 +23,6 @@ function Mode.new(map, participatingPlayers)
     self._playerModeData = self:_getPlayerModeData(participatingPlayers)
     self._events = {}
 
-    self:initCountdownEvents(participatingPlayers)
     return self
 end
 
@@ -120,24 +119,6 @@ end
 --[[ EVENTS ]]--
 function Mode:onGameTick()
     -- fires on every game tick; depends on game_service timerTick event --
-end
-
-function Mode:initCountdownEvents(playerList)
-    for _, userId in pairs (playerList) do
-        local player = game.Players:GetPlayerByUserId(userId)
-
-        if player then
-            local event = player.CharacterAdded:Connect(function()
-                local gameStatus = engine.services.game_service._status
-
-                if gameStatus == "Countdown" or gameStatus == "Loading" then
-                    self:freezePlayers({player})
-                end
-            end)
-
-            table.insert(self._events, event)
-        end
-    end
 end
 
 function Mode:initPlayerEvents(playerList)

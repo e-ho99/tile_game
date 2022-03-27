@@ -19,12 +19,12 @@ function TileRegionHandler.new(map)
     self._events = {}
 
     self:_initializeTiles()
-    self:onEnterLoop()
+    self:_onEnterLoop()
     print("tile region handler created")
     return self
 end
 
-function TileRegionHandler:onEnterLoop()
+function TileRegionHandler:_onEnterLoop()
     local mapChildren = self._map:GetDescendants()
     local overlapParams = OverlapParams.new()
     overlapParams.FilterDescendantsInstances = {game.Players.LocalPlayer.Character}
