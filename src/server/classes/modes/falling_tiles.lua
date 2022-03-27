@@ -14,7 +14,7 @@ function FallingTiles.new(map, participatingPlayers)
     local self =  setmetatable(engine.classes.mode.new(map, participatingPlayers), FallingTiles)
     self._name = "Falling Tiles"
     self._roundTime = 60
-    self._goalPlayerCount = 2
+    self._goalPlayerCount = 0
     self._tiles = {}
     self._elapsedTime = 0
 
@@ -65,6 +65,8 @@ function FallingTiles:eliminate(player)
         if self:_countActivePlayers() <= self._goalPlayerCount then
             engine.services.game_service:toPostgame()
         end
+
+        events.GameEvents.ModeEvents.PlayerEliminated:FireAllClients(player)
     end
 end
 

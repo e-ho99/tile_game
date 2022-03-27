@@ -29,8 +29,8 @@ function TimerUI:initEvents()
         self._timeLength = newLength
     end)
 
-    timerEvents.SetStatus.OnClientEvent:Connect(function(newStatus)
-        self._gui.Frame.Frame.Type.Text = newStatus
+    timerEvents.SetStatus.OnClientEvent:Connect(function(newStatus, replacementText)
+        self:updateStatus(replacementText or newStatus)
     end)
 end
 
@@ -40,7 +40,7 @@ function TimerUI:updateTime(newTime)
 end
 
 function TimerUI:updateStatus(newStatus)
-    self._gui.Frame.Frame.Type.Text = tostring(newStatus)
+    self._gui.Frame.Frame.Type.Text = tostring(newStatus):upper()
 end
 
 return TimerUI

@@ -20,12 +20,12 @@ function GameService.new()
     self._minimumPlayers = 1
     self._intermissionTime = 30
 
-    self:initEvents()
+    self:_initEvents()
     print("Created Game Service")
     return self
 end
 
-function GameService:initEvents()
+function GameService:_initEvents()
     game.Players.PlayerRemoving:Connect(function(player)
         if self._mode then
             self._mode:clearPlayerData(player)
@@ -34,6 +34,8 @@ function GameService:initEvents()
         for i, p in pairs (self._participatingPlayers) do
             if p == player then
                 table.remove(self._participatingPlayers, i)
+                gameEvents.ParticipatingPlayerRemoved:FireAllClients(player.UserId)
+                print("Removed", player, "from participating players for leaving")
             end
         end
     end)
@@ -98,7 +100,7 @@ function GameService:selectMode(map)
     local modeName = engine.services.map_service:selectMode(map)
     modeName = modeName:gsub(" ", "_"):lower()
     local mode = engine.modes[modeName]
-    self._mode = mode.new(map, game.Players:GetPlayers())
+    self._mode = mode.new(map, self._participatingPlayers)
 
     gameEvents.SetMode:FireAllClients(modeName)
     print("Selected mode:", modeName)
@@ -118,7 +120,8 @@ end
 
 function GameService:toGameSelect()
     self._status = "Selection"
-    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
+    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
+    self:updateParticipatingPlayers()
     self:selectMap()
     self:selectMode(self._map)
     self:toLoading()
@@ -126,8 +129,7 @@ end
 
 function GameService:toLoading()
     self._status = "Loading"
-    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
-    self:updateParticipatingPlayers()
+    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
     self._map:loadMap()
     self._mode:initMapEvents()
     self._mode:initPlayerEvents(self._participatingPlayers)
@@ -140,20 +142,19 @@ end
 
 function GameService:toCountdown()
     self._status = "Countdown"
-    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
+    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, self._mode._name)
     engine.services.timer_service:enable(5)
 end
 
 function GameService:toPlaying()
     self._status = "Playing"
-    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
+    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, self._mode._name)
     self._mode:startRound()
 end
 
-
 function GameService:toPostgame()
     self._status = "Postgame"
-    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status)
+    sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
     local winners, winnersString = self._mode:getWinners()
     sharedEvents.GameEvents.SendWinners:FireAllClients(winnersString)
     self:clear()

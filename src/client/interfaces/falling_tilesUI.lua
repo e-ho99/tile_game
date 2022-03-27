@@ -25,16 +25,17 @@ function FallingTiles.new()
 end
 
 function FallingTiles:_addPlayers(playerlist)
-    for index, player in pairs (playerlist) do
+    for index, userId in pairs (playerlist) do
         local parentFrame = self._playerContainers[math.ceil(index / 3)]
         local newIcon = self._elementsStorage[parentFrame.Parent.Name .. "Player"]:Clone()
-        self._playerToElement[player] = newIcon
-        newIcon.Holder.PlayerImage.Image = game.Players:GetUserThumbnailAsync(player.UserId, 
+
+        self._playerToElement[userId] = newIcon
+        newIcon.Holder.PlayerImage.Image = game.Players:GetUserThumbnailAsync(userId, 
             Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
         newIcon.Visible = true
         newIcon.Parent = parentFrame
         
-        print(index, player, parentFrame, parentFrame.Parent)
+        print(index, userId, parentFrame, parentFrame.Parent)
     end
 end
 
@@ -57,12 +58,20 @@ function FallingTiles:_initEvents()
         self:_addPlayers(playerlist)
     end)
 
-    local elim = modeEvents.PlayerEliminated.OnClientEvent:Connect(function(player)
-        local icon = self._playerToElement[player]
+    local elim = modeEvents.PlayerEliminated.OnClientEvent:Connect(function(userId)
+        local icon = self._playerToElement[userId]
 
         if icon then
             icon.Holder.ImageColor3 = Color3.fromRGB(116, 116, 116)
             icon.Holder.PlayerImage.ImageColor3 = Color3.fromRGB(107, 107, 107)
+        end
+    end)
+
+    local rem = gameEvents.ParticipatingPlayerRemoved.OnClientEvent:Connect(function(userId)
+        local icon = self._playerToElement[userId]
+
+        if icon then
+            icon:Destroy()
         end
     end)
 

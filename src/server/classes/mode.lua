@@ -180,10 +180,9 @@ end
 
 function Mode:thawPlayers(playerList)
     for _, player in pairs(playerList) do
-        if player then
-            local c = player.Character
-            c.Humanoid.WalkSpeed = self._walkSpeed or 16
-            c.Humanoid.JumpPower = self._jumpPower or 50
+        if player and player.Character then
+            player.Character.Humanoid.WalkSpeed = self._walkSpeed or 16
+            player.Character.Humanoid.JumpPower = self._jumpPower or 50
         end
     end
 end

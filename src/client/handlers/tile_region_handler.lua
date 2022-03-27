@@ -96,7 +96,7 @@ function TileRegionHandler:_initializeTiles()
         self._tileStates[tile] = newState
         
         -- TODO: remove for release version
-        self:_showRegion(tile)
+        --self:_showRegion(tile)
     end
 end
 
