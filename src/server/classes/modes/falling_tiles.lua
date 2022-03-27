@@ -14,7 +14,7 @@ function FallingTiles.new(map, participatingPlayers)
     local self =  setmetatable(engine.classes.mode.new(map, participatingPlayers), FallingTiles)
     self._name = "Falling Tiles"
     self._roundTime = 60
-    self._goalPlayerCount = 0
+    self._goalPlayerCount = 2
     self._tiles = {}
     self._elapsedTime = 0
 
@@ -24,7 +24,9 @@ end
 function FallingTiles:initMapEvents()
     self._tiles = self._map._model.Tiles:GetChildren()
 
-    for _, player in pairs(self._participatingPlayers) do
+    for _, userId in pairs(self._participatingPlayers) do
+        local player = game.Players:GetPlayerByUserId(userId)
+
         if player then
             events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
         end
@@ -54,7 +56,7 @@ end
 
 function FallingTiles:eliminate(player)
     -- handles elimination of player; defaults to elimination on first death --
-    local data = self._playerModeData[player]
+    local data = self._playerModeData[player.UserId]
 
     if data and data["Active"] then
         data["Alive"] = false
@@ -66,7 +68,7 @@ function FallingTiles:eliminate(player)
             engine.services.game_service:toPostgame()
         end
 
-        events.GameEvents.ModeEvents.PlayerEliminated:FireAllClients(player)
+        events.GameEvents.ModeEvents.PlayerEliminated:FireAllClients(player.UserId)
     end
 end
 
