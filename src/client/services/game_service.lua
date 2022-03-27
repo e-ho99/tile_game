@@ -13,13 +13,13 @@ function GameServiceClient.new()
     self._mode = gameEvents.GetMode:InvokeServer()
     self._regionHandler = nil
 
-    self:initEvents()
+    self:_initEvents()
 
     print("Created Game Service Client")
     return self
 end
 
-function GameServiceClient:initEvents()
+function GameServiceClient:_initEvents()
     gameEvents.SetMap.OnClientEvent:Connect(function(mapName, mapModel)
         self._map = mapName
         self._mapModel = mapModel

@@ -23,39 +23,40 @@ function Mode.new(map, participatingPlayers)
     self._playerModeData = self:_getPlayerModeData(participatingPlayers)
     self._events = {}
 
-    self:initCountdownEvents(participatingPlayers)
     return self
 end
 
-function Mode:clearPlayerData(player)
-    self._playerModeData[player] = nil
+function Mode:clearPlayerData(userId)
+    self._playerModeData[userId] = nil
 end
 
 function Mode:eliminate(player)
     -- handles elimination of player; defaults to elimination on first death --
-    local data = self._playerModeData[player]
+    if player then
+        local data = self._playerModeData[player.UserId]
 
-    if data and data["Active"] then
-        data["Alive"] = false
-        data["Active"] = false
-        
-        print("Eliminated", player)
+        if data and data["Active"] then
+            data["Alive"] = false
+            data["Active"] = false
+            
+            print("Eliminated", player)
+        end
+
+        modeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
+        modeEvents.PlayerEliminated:FireAllClients(player)
     end
-
-    modeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
-    modeEvents.PlayerEliminated:FireAllClients(player)
 end
 
 function Mode:startRound()
     self._enabled = true
 
-    for player, data in pairs(self._playerModeData) do
-        modeEvents.ModeEnabled:FireClient(player)
+    for userId, data in pairs(self._playerModeData) do
+        modeEvents.ModeEnabled:FireClient(game.Players:GetPlayerByUserId(userId))
     end
 
     engine.services.timer_service:enable(self._roundTime)
     self._currentRound = self._currentRound + 1
-    self:thawPlayers(self._participatingPlayers)
+    self:thawPlayers(engine.services.game_service:getPlayerList())
 end
 
 function Mode:roundComplete()
@@ -70,8 +71,8 @@ function Mode:Destroy()
         e:Disconnect()
     end
 
-    for player, data in pairs (self._playerModeData) do
-        modeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
+    for userId, data in pairs (self._playerModeData) do
+        modeEvents.RemoveUI:FireClient(game.Players:GetPlayerByUserId(userId), self._name:gsub(" ", "_"):lower())
     end
 end
 
@@ -80,8 +81,10 @@ function Mode:getWinners()
     -- overwritten with each mode as tracked data can vary; defaults to players who survive --
     local winners = {["Players"] = {}, ["Ordered"] = false}
     local winnersString = ""
-    for player, modeData in pairs(self._playerModeData) do
-        if modeData["Alive"] then
+    for userId, modeData in pairs(self._playerModeData) do
+        local player = game.Players:GetPlayerByUserId(userId)
+
+        if modeData["Alive"] and player then
             print(player)
             if winnersString == "" then
                 winnersString = player.Name
@@ -100,14 +103,14 @@ function Mode:_getPlayerModeData(participatingPlayers)
     -- overwritten with each mode as tracked data can vary; defaults to players who survive --
     local data = {}
 
-    for _, player in pairs(participatingPlayers) do
+    for _, userId in pairs(participatingPlayers) do
         local modeData = {}
 
         for key, val in pairs (self._modeData) do
             modeData[key] = val
         end
 
-        data[player] = modeData
+        data[userId] = modeData
     end
 
     return data
@@ -118,39 +121,30 @@ function Mode:onGameTick()
     -- fires on every game tick; depends on game_service timerTick event --
 end
 
-function Mode:initCountdownEvents(playerList)
-    for _, player in pairs (playerList) do
-        local event = player.CharacterAdded:Connect(function()
-            local gameStatus = engine.services.game_service._status
-
-            if gameStatus == "Countdown" or gameStatus == "Loading" then
-                self:freezePlayers({player})
-            end
-        end)
-
-        table.insert(self._events, event)
-    end
-end
-
 function Mode:initPlayerEvents(playerList)
-    for _, player in pairs (playerList) do
-        local c = player.Character
+    for _, userId in pairs (playerList) do
+        local player = game.Players:GetPlayerByUserId(userId)
 
-        if c then
-            c.Humanoid.Died:Connect(function()
-                self:eliminate(player)
-            end)
+        if player then
+            local c = player.Character
+
+            if c then
+                c.Humanoid.Died:Connect(function()
+                    self:eliminate(player)
+                end)
+            else
+                local event = player.CharacterAdded:Connect(function(char)
+                    local character = char
+                    character.Humanoid.Died:Connect(function()
+                        self:eliminate(player)
+                    end)
+                end)
+
+                table.insert(self._events, event)
+            end
+
+            modeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())
         end
-
-        local event = player.CharacterAdded:Connect(function(char)
-            local character = char
-            character.Humanoid.Died:Connect(function()
-                self:eliminate(player)
-            end)
-        end)
-
-        table.insert(self._events, event)
-        modeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())
     end
 end
 
@@ -161,7 +155,9 @@ end
 --[[ MISC ]]--
 function Mode:respawnPlayers()
     -- respawn players who need to; defaults to using "Active" key in player's mode data
-    for player, modeData in pairs(self._playerModeData) do
+    for userId, modeData in pairs(self._playerModeData) do
+        local player = game.Players:GetPlayerByUserId(userId)
+
         if player and modeData["Active"] then
             player:LoadCharacter()
         end
@@ -214,17 +210,6 @@ function Mode:_initTileEnteredEvent()
                 if distance < 20 or yDifference > 20 then
                     self:_onTileEntered(player, tile)
                 end
-            end
-        end
-    end)
-
-    local exited = events.GameEvents.TileEvents.TileEntered.OnServerEvent:Connect(function(player, tile)
-        if self._enabled then
-            -- verify that player position within range of tile --
-            local character = player.Character
-
-            if character and tile then
-                self:_onTileExited(player, tile)
             end
         end
     end)

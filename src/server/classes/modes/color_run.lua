@@ -31,7 +31,9 @@ end
 function ColorRun:initMapEvents()
     self._tiles = self._map._model.Tiles:GetChildren()
 
-    for _, player in pairs(self._participatingPlayers) do
+    for _, userId in pairs(self._participatingPlayers) do
+        local player = game.Players:GetPlayerByUserId(userId)
+
         if player then
             events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
         end
@@ -49,14 +51,14 @@ function ColorRun:initPlayerEvents(playerList)
             c.Humanoid.Died:Connect(function()
                 self:eliminate(player)
             end)
-        end
-
-        local event = player.CharacterAdded:Connect(function(char)
-            local character = char
-            character.Humanoid.Died:Connect(function()
-                self:eliminate(player)
+        else
+            local event = player.CharacterAdded:Connect(function(char)
+                local character = char
+                character.Humanoid.Died:Connect(function()
+                    self:eliminate(player)
+                end)
             end)
-        end)
+        end
         
         self:_assignTeam(player, i)
         events.GameEvents.ModeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())

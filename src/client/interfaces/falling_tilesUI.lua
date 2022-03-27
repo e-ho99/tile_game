@@ -77,6 +77,7 @@ function FallingTiles:_initEvents()
 
     table.insert(self._events, e)
     table.insert(self._events, elim)
+    table.insert(self._events, rem)
 end
 
 return FallingTiles
