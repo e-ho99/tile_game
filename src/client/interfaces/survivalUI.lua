@@ -1,16 +1,16 @@
-FallingTiles = {}
-FallingTiles.__index = FallingTiles
+SurvivalUI = {}
+SurvivalUI.__index = SurvivalUI
 
 local modeEvents = game.ReplicatedStorage.shared.Events.GameEvents.ModeEvents
 local gameEvents = game.ReplicatedStorage.shared.Events.GameEvents
 
-function FallingTiles:init(e)
+function SurvivalUI:init(e)
     engine = e
-    setmetatable(FallingTiles, engine.interfaces.gui)
+    setmetatable(SurvivalUI, engine.interfaces.gui)
 end
 
-function FallingTiles.new()
-    local self = setmetatable(engine.interfaces.gui.new(script.Name), FallingTiles)
+function SurvivalUI.new()
+    local self = setmetatable(engine.interfaces.gui.new(script.Name), SurvivalUI)
     self._playerToElement = {}
     self._elementsStorage = self._gui.Elements
     self._mainframe = self._gui.Holder
@@ -24,7 +24,7 @@ function FallingTiles.new()
     return self
 end
 
-function FallingTiles:_addPlayers(playerlist)
+function SurvivalUI:_addPlayers(playerlist)
     for index, userId in pairs (playerlist) do
         local parentFrame = self._playerContainers[math.ceil(index / 3)]
         local newIcon = self._elementsStorage[parentFrame.Parent.Name .. "Player"]:Clone()
@@ -39,7 +39,7 @@ function FallingTiles:_addPlayers(playerlist)
     end
 end
 
-function FallingTiles:_clear()
+function SurvivalUI:_clear()
     for _, frame in pairs ({self._leftFrame, self._rightFrame}) do
         for _, descendant in pairs (frame:GetDescendants()) do
             if descendant:IsA("ImageLabel") then
@@ -49,7 +49,7 @@ function FallingTiles:_clear()
     end
 end
 
-function FallingTiles:_initEvents()
+function SurvivalUI:_initEvents()
     -- self:_addPlayers({game.Players.LocalPlayer, game.Players.LocalPlayer, game.Players.LocalPlayer, 
     --                 game.Players.LocalPlayer, game.Players.LocalPlayer, game.Players.LocalPlayer,
     --                 game.Players.LocalPlayer, game.Players.LocalPlayer, game.Players.LocalPlayer,
@@ -80,4 +80,4 @@ function FallingTiles:_initEvents()
     table.insert(self._events, rem)
 end
 
-return FallingTiles
+return SurvivalUI

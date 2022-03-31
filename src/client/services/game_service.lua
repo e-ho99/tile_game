@@ -12,6 +12,7 @@ function GameServiceClient.new()
     self._map, self._mapModel = gameEvents.GetMap:InvokeServer()
     self._mode = gameEvents.GetMode:InvokeServer()
     self._regionHandler = nil
+    self._tool = nil
 
     self:_initEvents()
 
@@ -43,17 +44,27 @@ function GameServiceClient:_initEvents()
         self._regionHandler:disable()
     end)
 
-    gameEvents.ModeEvents.ShowUI.OnClientEvent:Connect(function(mode)
-        engine.services.interface_service:addGui(mode .. "UI", true)
+    gameEvents.ModeEvents.ShowUI.OnClientEvent:Connect(function(uiName)
+        engine.services.interface_service:addGui(uiName .. "UI", true)
     end)
 
-    gameEvents.ModeEvents.RemoveUI.OnClientEvent:Connect(function(mode)
-        engine.services.interface_service:removeGui(mode .. "UI")
+    gameEvents.ModeEvents.RemoveUI.OnClientEvent:Connect(function(uiName)
+        engine.services.interface_service:removeGui(uiName .. "UI")
     end)
 
     gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(events)
         if self._mapModel then
             self._regionHandler = engine.handlers.tile_region_handler.new(self._mapModel)
+        end
+    end)
+
+    gameEvents.ToolEvents.SendTool.OnClientEvent:Connect(function(tool)
+        local toolObj = engine.classes[tool.Name:lower()]
+
+        if toolObj then
+            self._tool = toolObj.new(tool)
+        else
+            warn("Could not locate tool", tool.Name:lower())
         end
     end)
 end
