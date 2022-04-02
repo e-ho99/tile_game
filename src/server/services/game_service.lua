@@ -154,19 +154,20 @@ function GameService:toLoading()
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         self._map:loadMap()
         self._mode:initMapEvents()
-        self._mode:initPlayerEvents(self._participatingPlayers)
+        self._mode:initPlayerEvents(self:getPlayerList())
         gameEvents.SendPlayers:FireAllClients(self._participatingPlayers)
         task.wait(1.5)
         local playerList = self:getPlayerList()
         self._map:spawnPlayers(playerList, "random")
         self._mode:freezePlayers(playerList)
+        self._mode:initToolHandler()
         self:toCountdown()
     end
 end
 
 function GameService:toCountdown()
     if self._status ~= "Countdown" then
-        self._status = "Countdown"
+        self._status = "Countdown"   
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, self._mode._name)
         engine.services.timer_service:enable(5)
     end
@@ -200,7 +201,7 @@ function GameService:timerTick()
         self._mode:onGameTick()    
     end
 
-    print("Timer tick")
+    --print("Timer tick")
 end
 
 function GameService:timerComplete()
