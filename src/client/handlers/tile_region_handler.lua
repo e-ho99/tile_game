@@ -38,7 +38,6 @@ function TileRegionHandler:_onEnterLoop()
                 local parts = workspace:GetPartBoundsInBox(base.CFrame * CFrame.new(0, 100 + (base.Size.Y / 2), 0), Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
                 
                 if #parts > 1 and not self._tileStates[tile].isEntered then -- on first entrance
-                    print(parts)
                     self._tileStates[tile].isEntered = true
                     gameEvents.TileEvents.TileEntered:FireServer(tile)
                 elseif #parts < 1 and self._tileStates[tile].isEntered then -- on first exit
@@ -50,19 +49,6 @@ function TileRegionHandler:_onEnterLoop()
     end)
 
     table.insert(self._events, e)
-    -- LOOPED VERSION IN CASE RENDERSTEPPED IS TOO EXPENSIVE --
-    -- while task.wait(.1) do
-        -- if self._enabled then
-        --     for _, tile in pairs (self._tiles) do
-        --         local base = tile.PrimaryPart
-        --         local parts = workspace:GetPartBoundsInBox(base.CFrame, Vector3.new(base.Size.X, 200, base.Size.Z), overlapParams)
-
-        --         if parts and #parts > 1 then
-        --             gameEvents.TileEvents.TileEntered:FireServer(tile)
-        --         end
-        --     end
-        -- end
-    -- end
 end
 
 function TileRegionHandler:enable()

@@ -11,13 +11,17 @@ end
 function Mode.new(map, participatingPlayers)
     local self = setmetatable({}, Mode)
     self._name = ""
+    self._uiType = nil
     self._map = map
     self._modeData = {["Active"] = true, ["Alive"] = true}
+    self._walkSpeed = 21
+    self._jumpPower = 60
     -- TODO: create RoundHandler obj to store these values
     self._roundTime = 60
     self._currentRound = 0
     self._roundTotal = 1
     self._enabled = false
+    self._tool = nil
     self._hints = {}
     self._participatingPlayers = participatingPlayers
     self._playerModeData = self:_getPlayerModeData(participatingPlayers)
@@ -26,25 +30,18 @@ function Mode.new(map, participatingPlayers)
     return self
 end
 
-function Mode:clearPlayerData(userId)
-    self._playerModeData[userId] = nil
+function Mode:setMovement(player)
+    local character = player.Character 
+
+    if character then
+        local h = character.Humanoid
+        h.WalkSpeed = self._walkSpeed
+        h.JumpPower = self._jumpPower
+    end
 end
 
-function Mode:eliminate(player)
-    -- handles elimination of player; defaults to elimination on first death --
-    if player then
-        local data = self._playerModeData[player.UserId]
-
-        if data and data["Active"] then
-            data["Alive"] = false
-            data["Active"] = false
-            
-            print("Eliminated", player)
-        end
-
-        modeEvents.RemoveUI:FireClient(player, self._name:gsub(" ", "_"):lower())
-        modeEvents.PlayerEliminated:FireAllClients(player)
-    end
+function Mode:clearPlayerData(userId)
+    self._playerModeData[userId] = nil
 end
 
 function Mode:startRound()
@@ -71,8 +68,10 @@ function Mode:Destroy()
         e:Disconnect()
     end
 
+    self._toolHandler:Destroy()
+
     for userId, data in pairs (self._playerModeData) do
-        modeEvents.RemoveUI:FireClient(game.Players:GetPlayerByUserId(userId), self._name:gsub(" ", "_"):lower())
+        modeEvents.RemoveUI:FireClient(game.Players:GetPlayerByUserId(userId), self._uiType or self._name:gsub(" ", "_"):lower())
     end
 end
 
@@ -81,6 +80,7 @@ function Mode:getWinners()
     -- overwritten with each mode as tracked data can vary; defaults to players who survive --
     local winners = {["Players"] = {}, ["Ordered"] = false}
     local winnersString = ""
+    
     for userId, modeData in pairs(self._playerModeData) do
         local player = game.Players:GetPlayerByUserId(userId)
 
@@ -117,14 +117,16 @@ function Mode:_getPlayerModeData(participatingPlayers)
 end
 
 --[[ EVENTS ]]--
+function Mode:eliminate(player)
+    -- overwritten and fired when player is eliminated from game -- 
+end
+
 function Mode:onGameTick()
     -- fires on every game tick; depends on game_service timerTick event --
 end
 
 function Mode:initPlayerEvents(playerList)
-    for _, userId in pairs (playerList) do
-        local player = game.Players:GetPlayerByUserId(userId)
-
+    for _, player in pairs (playerList) do
         if player then
             local c = player.Character
 
@@ -143,8 +145,14 @@ function Mode:initPlayerEvents(playerList)
                 table.insert(self._events, event)
             end
 
-            modeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())
+            modeEvents.ShowUI:FireClient(player, self._uiType or self._name:gsub(" ", "_"):lower())
         end
+    end
+end
+
+function Mode:initToolHandler()
+    if self._tool then
+        self._toolHandler = engine.handlers.tool_handler.new(self._tool, self)
     end
 end
 
@@ -238,6 +246,10 @@ end
 function Mode:_onTileExited(player, tile)
     -- overwritten by game modes as what is done varies between modes -- 
     -- print(player, "exited tile", tile)
+end
+
+function Mode:_onTileInput(player, tile)
+    -- overwritten by game modes as what is done varies between modes -- 
 end
 
 return Mode
