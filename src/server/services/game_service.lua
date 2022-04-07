@@ -16,7 +16,7 @@ function GameService.new()
     self._mode = nil -- mode object
     self._map = nil -- map object
     self._participatingPlayers = {} -- list of Player obj
-
+    self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 60}
     self._minimumPlayers = 1
     self._intermissionTime = 10
 
@@ -26,6 +26,19 @@ function GameService.new()
 end
 
 function GameService:_initEvents()
+    game.Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(character)
+            local h = character.Humanoid
+            
+            if self._mode then
+                self._mode:setMovement(player)
+            else
+                h.WalkSpeed = self._movement.WalkSpeed
+                h.JumpPower = self._movement.JumpPower
+            end
+        end)
+    end)
+
     game.Players.PlayerRemoving:Connect(function(player)
         if self._mode then
             self._mode:clearPlayerData(player.UserId)

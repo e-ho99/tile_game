@@ -11,6 +11,7 @@ function GameServiceClient.new()
     local self = setmetatable({}, GameServiceClient)
     self._map, self._mapModel = gameEvents.GetMap:InvokeServer()
     self._mode = gameEvents.GetMode:InvokeServer()
+    self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 75}
     self._regionHandler = nil
     self._tool = nil
 
@@ -34,6 +35,7 @@ function GameServiceClient:_initEvents()
 
     gameEvents.ClearGame.OnClientEvent:Connect(function()
         self._regionHandler = self._regionHandler:Destroy() -- sets _regionHandler to nil
+        self._tool = self._tool:Destroy()
     end)
 
     gameEvents.ModeEvents.ModeEnabled.OnClientEvent:Connect(function()

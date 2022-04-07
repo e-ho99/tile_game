@@ -13,6 +13,7 @@ end
 function FallingTiles.new(map, participatingPlayers)
     local self =  setmetatable(engine.classes.mode.new(map, participatingPlayers), FallingTiles)
     self._name = "Falling Tiles"
+    self._uiType = "survival"
     self._roundTime = 60
     self._goalPlayerCount = 2
     self._tiles = {}
@@ -31,9 +32,6 @@ function FallingTiles:initMapEvents()
             events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
         end
     end
-
-    self:_initTileEnteredEvent()
-    self:_initTileExitedEvent()
 end
 
 function FallingTiles:onGameTick()
@@ -61,8 +59,6 @@ function FallingTiles:eliminate(player)
     if data and data["Active"] then
         data["Alive"] = false
         data["Active"] = false
-        
-        print("Eliminated", player)
 
         if self:_countActivePlayers() <= self._goalPlayerCount then
             engine.services.game_service:toPostgame()
