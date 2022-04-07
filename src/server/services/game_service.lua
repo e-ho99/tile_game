@@ -16,7 +16,7 @@ function GameService.new()
     self._mode = nil -- mode object
     self._map = nil -- map object
     self._participatingPlayers = {} -- list of Player obj
-
+    self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 60}
     self._minimumPlayers = 1
     self._intermissionTime = 10
 
@@ -26,6 +26,19 @@ function GameService.new()
 end
 
 function GameService:_initEvents()
+    game.Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(character)
+            local h = character.Humanoid
+            
+            if self._mode then
+                self._mode:setMovement(player)
+            else
+                h.WalkSpeed = self._movement.WalkSpeed
+                h.JumpPower = self._movement.JumpPower
+            end
+        end)
+    end)
+
     game.Players.PlayerRemoving:Connect(function(player)
         if self._mode then
             self._mode:clearPlayerData(player.UserId)
@@ -154,19 +167,20 @@ function GameService:toLoading()
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         self._map:loadMap()
         self._mode:initMapEvents()
-        self._mode:initPlayerEvents(self._participatingPlayers)
+        self._mode:initPlayerEvents(self:getPlayerList())
         gameEvents.SendPlayers:FireAllClients(self._participatingPlayers)
         task.wait(1.5)
         local playerList = self:getPlayerList()
         self._map:spawnPlayers(playerList, "random")
         self._mode:freezePlayers(playerList)
+        self._mode:initToolHandler()
         self:toCountdown()
     end
 end
 
 function GameService:toCountdown()
     if self._status ~= "Countdown" then
-        self._status = "Countdown"
+        self._status = "Countdown"   
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, self._mode._name)
         engine.services.timer_service:enable(5)
     end
@@ -200,7 +214,7 @@ function GameService:timerTick()
         self._mode:onGameTick()    
     end
 
-    print("Timer tick")
+    --print("Timer tick")
 end
 
 function GameService:timerComplete()

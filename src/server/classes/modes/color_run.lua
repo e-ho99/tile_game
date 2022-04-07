@@ -58,11 +58,12 @@ function ColorRun:initPlayerEvents(playerList)
                     self:eliminate(player)
                 end)
             end)
+
+            table.insert(self._events, event)
         end
         
         self:_assignTeam(player, i)
-        events.GameEvents.ModeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())
-        table.insert(self._events, event)
+        events.GameEvents.ModeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())  
     end
 end
 
@@ -71,9 +72,10 @@ function ColorRun:getWinners()
     local winnersString = ""
     local winningTeam = self:_getWinningTeam()
 
-    for player, modeData in pairs(self._playerModeData) do
+    for userId, modeData in pairs(self._playerModeData) do
         if modeData.Team == winningTeam then
-            print(player)
+            local player = game.Players:GetPlayerByUserId(userId)
+
             if winnersString == "" then
                 winnersString = player.Name
             else
@@ -113,7 +115,7 @@ function ColorRun:_assignTeam(player, index)
         team = BrickColor.new("Bright red")
     end
 
-    self._playerModeData[player].Team = team
+    self._playerModeData[player.UserId].Team = team
 end
 
 function ColorRun:_initTileOwnership(map)
@@ -126,7 +128,7 @@ function ColorRun:_onTileEntered(player, tile)
     local index = table.find(self._tiles, tile)
 
     if index then
-        local color = self._playerModeData[player].Team
+        local color = self._playerModeData[player.UserId].Team
         local currentColor = self._tileOwnership[tile]
 
         if not currentColor or currentColor ~= color then

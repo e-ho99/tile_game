@@ -27,7 +27,7 @@ function MapService:selectMode(map)
     print(map, map._name)
     -- TODO: remove to select random mode
     local possibleModes = self._mapToModes[map._name]
-    return "Falling Tiles"--possibleModes[math.random(1, #possibleModes)]
+    return "Spleef"--possibleModes[math.random(1, #possibleModes)]
 end
 
 function MapService:gatherData()
