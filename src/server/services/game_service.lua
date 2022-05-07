@@ -208,10 +208,10 @@ function GameService:toPostgame()
 end
 
 --[[ Timer Events ]]--
-function GameService:timerTick()
+function GameService:timerTick(dt)
     -- fires every time timer is updated (1s) -- 
     if self._status == "Playing" then
-        self._mode:onGameTick()    
+        self._mode:onGameTick(dt)    
     end
 
     --print("Timer tick")

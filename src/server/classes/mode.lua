@@ -121,7 +121,7 @@ function Mode:eliminate(player)
     -- overwritten and fired when player is eliminated from game -- 
 end
 
-function Mode:onGameTick()
+function Mode:onGameTick(dt)
     -- fires on every game tick; depends on game_service timerTick event --
 end
 
