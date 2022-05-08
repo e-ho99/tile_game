@@ -214,8 +214,9 @@ function Mode:_initTileEnteredEvent()
         if self._enabled then
             -- verify that player position within range of tile --
             local character = player.Character
-
-            if character and tile and tile.PrimaryPart then
+            
+            if character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 
+                and tile and tile.PrimaryPart then
                 local distance = (character.HumanoidRootPart.Position - tile.PrimaryPart.Position).magnitude
                 local yDifference = math.abs(character.HumanoidRootPart.Position.Y - tile.PrimaryPart.Position.Y)
 
