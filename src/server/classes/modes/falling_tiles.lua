@@ -60,7 +60,7 @@ function FallingTiles:eliminate(player)
         data["Alive"] = false
         data["Active"] = false
 
-        if self:_countActivePlayers() <= self._goalPlayerCount then
+        if #self:_getActivePlayers() <= self._goalPlayerCount then
             engine.services.game_service:toPostgame()
         end
 
