@@ -46,7 +46,6 @@ end
 
 function TimerService:updateTimer(newTime)
     self._time = newTime
-
     timerEvents.SendTime:FireAllClients(self._time)
 end
 
@@ -70,9 +69,9 @@ function TimerService:onTickLoop()
             self._lastTick = currentTick
 
             if self._timeElapsed >= 1 then
-                self:updateTimer(math.clamp(self._time - 1, 0, math.huge))
-                engine.services.game_service:timerTick(self._timeElapsed) -- notify game service
                 self._timeElapsed = 0
+                self:updateTimer(math.clamp(self._time - 1, 0, math.huge))
+                engine.services.game_service:timerTick(self._timeElapsed) -- notify game service 
 
                 --print(self._time)
                 if self._time == 0 and self._enabled then
