@@ -125,6 +125,10 @@ function GameService:updateParticipatingPlayers()
 
     for _, player in pairs (game.Players:GetPlayers()) do
         table.insert(players, player.UserId)
+
+        if player.Character == nil or player.Character.Humanoid.Health <= 0 then
+            player:LoadCharacter()
+        end
     end
 
     self._participatingPlayers = players
