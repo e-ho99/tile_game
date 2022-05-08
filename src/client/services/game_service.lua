@@ -34,7 +34,9 @@ function GameServiceClient:_initEvents()
     end)
 
     gameEvents.ClearGame.OnClientEvent:Connect(function()
-        self._regionHandler = self._regionHandler:Destroy() -- sets _regionHandler to nil
+        if self._regionHandler then
+            self._regionHandler = self._regionHandler:Destroy() -- sets _regionHandler to nil
+        end
         
         if self._tool then
             self._tool = self._tool:Destroy()
@@ -42,11 +44,15 @@ function GameServiceClient:_initEvents()
     end)
 
     gameEvents.ModeEvents.ModeEnabled.OnClientEvent:Connect(function()
-        self._regionHandler:enable()
+        if self._regionHandler then
+            self._regionHandler:enable()
+        end
     end)
 
     gameEvents.ModeEvents.ModeDisabled.OnClientEvent:Connect(function()
-        self._regionHandler:disable()
+        if self._regionHandler then
+            self._regionHandler:disable()
+        end
     end)
 
     gameEvents.ModeEvents.ShowUI.OnClientEvent:Connect(function(uiName)

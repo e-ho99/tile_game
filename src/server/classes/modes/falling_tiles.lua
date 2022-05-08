@@ -29,7 +29,7 @@ function FallingTiles:initMapEvents()
         local player = game.Players:GetPlayerByUserId(userId)
 
         if player then
-            events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
+            --events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
         end
     end
 end
