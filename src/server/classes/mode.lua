@@ -68,7 +68,9 @@ function Mode:Destroy()
         e:Disconnect()
     end
 
-    self._toolHandler:Destroy()
+    if self._toolHandler then
+        self._toolHandler:Destroy()
+    end
 
     for userId, data in pairs (self._playerModeData) do
         modeEvents.RemoveUI:FireClient(game.Players:GetPlayerByUserId(userId), self._uiType or self._name:gsub(" ", "_"):lower())
@@ -121,7 +123,7 @@ function Mode:eliminate(player)
     -- overwritten and fired when player is eliminated from game -- 
 end
 
-function Mode:onGameTick()
+function Mode:onGameTick(dt)
     -- fires on every game tick; depends on game_service timerTick event --
 end
 
@@ -191,16 +193,18 @@ function Mode:thawPlayers(playerList)
     end
 end
 
-function Mode:_countActivePlayers()
-    local count = 0
+function Mode:_getActivePlayers()
+    local players = {}
 
-    for _, data in pairs (self._playerModeData) do
-        if data["Active"] then
-            count = count + 1
+    for userId, data in pairs (self._playerModeData) do
+        local player = game.Players:GetPlayerByUserId(userId)
+
+        if player and data["Active"] then
+            table.insert(players, player)
         end
     end
 
-    return count
+    return players
 end
 
 --[[ TILE EVENTS ]]--
@@ -210,8 +214,9 @@ function Mode:_initTileEnteredEvent()
         if self._enabled then
             -- verify that player position within range of tile --
             local character = player.Character
-
-            if character and tile and tile.PrimaryPart then
+            
+            if character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 
+                and tile and tile.PrimaryPart then
                 local distance = (character.HumanoidRootPart.Position - tile.PrimaryPart.Position).magnitude
                 local yDifference = math.abs(character.HumanoidRootPart.Position.Y - tile.PrimaryPart.Position.Y)
 

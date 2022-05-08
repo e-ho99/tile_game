@@ -35,7 +35,10 @@ function GameServiceClient:_initEvents()
 
     gameEvents.ClearGame.OnClientEvent:Connect(function()
         self._regionHandler = self._regionHandler:Destroy() -- sets _regionHandler to nil
-        self._tool = self._tool:Destroy()
+        
+        if self._tool then
+            self._tool = self._tool:Destroy()
+        end
     end)
 
     gameEvents.ModeEvents.ModeEnabled.OnClientEvent:Connect(function()

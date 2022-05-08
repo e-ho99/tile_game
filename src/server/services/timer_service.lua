@@ -71,9 +71,9 @@ function TimerService:onTickLoop()
 
             if self._timeElapsed >= 1 then
                 self:updateTimer(math.clamp(self._time - 1, 0, math.huge))
+                engine.services.game_service:timerTick(self._timeElapsed) -- notify game service
                 self._timeElapsed = 0
-                engine.services.game_service:timerTick() -- notify game service
-                
+
                 --print(self._time)
                 if self._time == 0 and self._enabled then
                     self._enabled = false

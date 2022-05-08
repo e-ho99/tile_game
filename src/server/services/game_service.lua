@@ -125,6 +125,10 @@ function GameService:updateParticipatingPlayers()
 
     for _, player in pairs (game.Players:GetPlayers()) do
         table.insert(players, player.UserId)
+
+        if player.Character == nil or player.Character.Humanoid.Health <= 0 then
+            player:LoadCharacter()
+        end
     end
 
     self._participatingPlayers = players
@@ -208,10 +212,10 @@ function GameService:toPostgame()
 end
 
 --[[ Timer Events ]]--
-function GameService:timerTick()
+function GameService:timerTick(dt)
     -- fires every time timer is updated (1s) -- 
     if self._status == "Playing" then
-        self._mode:onGameTick()    
+        self._mode:onGameTick(dt)    
     end
 
     --print("Timer tick")
