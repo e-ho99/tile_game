@@ -17,6 +17,7 @@ function GameService.new()
     self._map = nil -- map object
     self._participatingPlayers = {} -- list of Player obj
     self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 60}
+    self._rewardsTable = {70, 55, 40, 25} 
     self._minimumPlayers = 1
     self._intermissionTime = 10
 
@@ -203,6 +204,7 @@ function GameService:toPostgame()
         self._status = "Postgame"
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         local winners, winnersString = self._mode:getWinners()
+        self:_giveRewards(winners)
         sharedEvents.GameEvents.SendWinners:FireAllClients(winnersString)
         self:clear()
         self:toIntermission()
@@ -233,6 +235,25 @@ function GameService:timerComplete()
         if finalRoundDone then
             self:toPostgame()
         end
+    end
+end
+
+function GameService:_giveRewards(winners)
+    print("GIVE REWARDS")
+    for placement, userId in pairs (winners.Players) do
+        local dataHandler = engine.services.data_service:getHandler(userId, "PlayerData")
+
+        if winners.Ordered then
+            placement = math.clamp(placement, 1, 4)
+        else
+            placement = 2
+        end
+
+        local coinsAwarded = self._rewardsTable[placement]
+        local expAwarded = 100
+
+        dataHandler:incrementCoins(coinsAwarded)
+        dataHandler:incrementExperience(expAwarded)
     end
 end
 
