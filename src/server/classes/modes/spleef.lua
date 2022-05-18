@@ -18,7 +18,7 @@ function Spleef.new(map, participatingPlayers)
     self._tileState = {} -- stores dict that maps tiles to index of active tiles
     self._tool = game.ServerStorage.Tools.Spleefer
     self._goalPlayerCount = 1
-    self._roundTime = 120
+    self._roundTime = 5
     self._elapsedTime = 0
 
     return self
@@ -64,16 +64,22 @@ function Spleef:onGameTick()
     local amount = math.ceil(math.random(2, 6) * multiplier)
 
     for i= 1, amount do
-        if #self._tiles > 0 then
-            local num = math.random(1, #self._tiles)
-            local selectedTile = self._tiles[num]
-            self._tileState[selectedTile] = nil
-            table.remove(self._tiles, num)
+        if #self._tiles > 0  then
+            task.spawn(function()
+                task.wait(math.random(0, 10) / 10)
+                local num = math.random(1, #self._tiles)
+                local selectedTile = self._tiles[num]
+                self._tileState[selectedTile] = nil
+                table.remove(self._tiles, num)
 
-            if selectedTile and selectedTile.PrimaryPart then
-                self:_rumbleAndDestroy(selectedTile)
-                print("Random remove tile")
-            end
+                if selectedTile and selectedTile.PrimaryPart then
+                    self:_rumbleAndDestroy(selectedTile) 
+                    
+                    print("Random remove tile")
+                end
+            end)
+        else
+            break
         end
     end
 end
@@ -84,7 +90,10 @@ function Spleef:_onTileInput(player, tile)
     if self._enabled and tilePos then
         self._tileState[tile] = nil
         table.remove(self._tiles, tilePos)
-        self:_rumbleAndDestroy(tile)
+        task.spawn(function() 
+            self:_rumbleAndDestroy(tile) 
+        end)
+
         print("Click remove tile")
     end
 end
