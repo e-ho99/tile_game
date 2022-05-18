@@ -20,14 +20,14 @@ end
 function MapService:selectMap()
     -- TODO: remove to select random map
     local map = self._mapNames[math.random(1, #self._mapNames)]
-    return map
+    return "classic"--map
 end
 
 function MapService:selectMode(map)
     print(map, map._name)
     -- TODO: remove to select random mode
     local possibleModes = self._mapToModes[map._name]
-    return possibleModes[math.random(1, #possibleModes)]
+    return "spleef"--possibleModes[math.random(1, #possibleModes)]
 end
 
 function MapService:gatherData()

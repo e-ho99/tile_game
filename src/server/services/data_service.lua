@@ -2,6 +2,7 @@ DataService = {}
 DataService.__index = DataService
 
 local DataStoreService = game:GetService("DataStoreService")
+local DataStore2 = require(game.ServerScriptService.DataStore2)
 
 function DataService:init(e)
     engine = e
@@ -13,47 +14,49 @@ function DataService.new()
     self._dataStores = {
         ["PlayerData"] = DataStoreService:GetDataStore("PlayerData_001")
     }
+    self._masterKey = "0001"
+    self:_initDatastore()
     self:_initEvents()
     print("Created Game Service")
     return self
 end
 
+function DataService:getHandler(userId, handlerKey)
+    return self._dataHandlers[userId][handlerKey]
+end
+
+function DataService:_initDatastore()
+    DataStore2.Combine(self._masterKey, "Coins", "Experience", "Level", "Gems")
+end
+
 function DataService:_initEvents()
     game.Players.PlayerAdded:Connect(function(player)
-        self:_initData(player)
+        self:_initDataHandlers(player)
     end)
 
     game.Players.PlayerRemoving:Connect(function(player)
-        self:_saveData(player)
-        self:_removeData(player)
+        local userId = player.userId
+        self:_removeData(userId)
     end)
 end
 
-function DataService:_initData(player)
+function DataService:_initDataHandlers(player)
     local dataHandlers = {}
-    dataHandlers.PlayerData = engine.handlers.player_data_handler.new(player, self._dataStores.PlayerData)
+    dataHandlers.PlayerData = engine.handlers.player_data_handler.new(player)
 
-    self._dataHandlers[player] = dataHandlers
+    self._dataHandlers[player.userId] = dataHandlers
 
     print("Initialized data handlers for", player)
 end
 
-function DataService:_saveData(player, specific)
-    if not specific then
-        for _, dataHandler in pairs (self._dataHandlers[player]) do
-            dataHandler:save()
-        end
-    end
-end
-
-function DataService:_removeData(player)  
-    for _, handler in pairs (self._dataHandlers[player]) do
+function DataService:_removeData(userId)  
+    for _, handler in pairs (self._dataHandlers[userId]) do
         handler:Destroy()
     end
 
-    self._dataHandlers[player] = nil
+    self._dataHandlers[userId] = nil
 
-    print("Removed data handlers for", player)
+    print("Removed data handlers for", userId)
 end
 
 return DataService

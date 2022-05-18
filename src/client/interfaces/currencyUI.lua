@@ -1,6 +1,8 @@
 CurrencyUI = {}
 CurrencyUI.__index = CurrencyUI
 
+local DataEvents = game.ReplicatedStorage.shared.Events.DataEvents
+
 function CurrencyUI:init(e)
     engine = e
     setmetatable(CurrencyUI, engine.interfaces.gui)
@@ -15,36 +17,21 @@ function CurrencyUI.new()
         ["Coins"] = 0,
         ["Gems"] = 0
     }
-    self:initUI()
-    self:initEvents()
+    self:_initEvents()
     
     return self
 end
 
-function CurrencyUI:initEvents()
-    local folder = game.Players.LocalPlayer:WaitForChild("PlayerData")
-
-    folder.Coins.Changed:Connect(function()
-        local newVal = folder.Coins.Value
-
+function CurrencyUI:_initEvents()
+    DataEvents.CoinsUpdated.OnClientEvent:Connect(function(newVal)
         self._initialStates.Coins = newVal
         self._coinFrame.Amount.Text = tostring(newVal)
     end)
 
-    folder.Gems.Changed:Connect(function()
-        local newVal = folder.Gems.Value
-
+    DataEvents.GemsUpdated.OnClientEvent:Connect(function(newVal)
         self._initialStates.Gems = newVal
         self._gemFrame.Amount.Text = tostring(newVal)
     end)
-end
-
-function CurrencyUI:initUI()
-    local folder = game.Players.LocalPlayer:WaitForChild("PlayerData")
-    self._initialStates.Coins = folder.Coins.Value
-    self._initialStates.Gems = folder.Gems.Value
-    self._coinFrame.Amount.Text = tostring(folder.Coins.Value)
-    self._gemFrame.Amount.Text = tostring(folder.Gems.Value)
 end
 
 return CurrencyUI

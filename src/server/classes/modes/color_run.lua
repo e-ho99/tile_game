@@ -82,7 +82,7 @@ function ColorRun:getWinners()
                 winnersString = winnersString .. player.Name
             end
             
-            table.insert(winners.Players, player)
+            table.insert(winners.Players, player.userId)
         end
     end
 

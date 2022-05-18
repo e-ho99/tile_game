@@ -16,7 +16,6 @@ function Tool.new(tool)
     
     self:_initActionEvents()
 
-    print("new tool")
     return self
 end
 

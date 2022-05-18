@@ -18,7 +18,7 @@ function ScorchingTiles.new(map, participatingPlayers)
     self._uiType = "survival"
     self._canClaimTiles = false
     self._goalPlayerCount = 2
-    self._roundTime = 5
+    self._roundTime = 30
     self._tiles = {}
     self._elapsedTime = 0
     self._safeTiles = {}
@@ -38,27 +38,6 @@ function ScorchingTiles:initMapEvents()
     end
 
     self:_initTileEnteredEvent()
-end
-
-function ScorchingTiles:getWinners()
-    local winners = {["Players"] = {}, ["Ordered"] = false}
-    local winnersString = ""
-
-    for userId, modeData in pairs(self._playerModeData) do
-        if modeData.Active then
-            local player = game.Players:GetPlayerByUserId(userId)
-
-            if winnersString == "" then
-                winnersString = player.Name
-            else
-                winnersString = winnersString .. player.Name
-            end
-            
-            table.insert(winners.Players, player)
-        end
-    end
-
-    return winners, winnersString
 end
 
 function ScorchingTiles:eliminate(player)

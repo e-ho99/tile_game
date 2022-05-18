@@ -87,14 +87,13 @@ function Mode:getWinners()
         local player = game.Players:GetPlayerByUserId(userId)
 
         if modeData["Alive"] and player then
-            print(player)
             if winnersString == "" then
                 winnersString = player.Name
             else
                 winnersString = winnersString .. player.Name
             end
             
-            table.insert(winners.Players, player)
+            table.insert(winners.Players, player.userId)
         end
     end
 
