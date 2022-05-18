@@ -1,16 +1,28 @@
 PlayerDataHandler = {}
 PlayerDataHandler.__index = PlayerDataHandler
 
+local DataStore2 = require(game.ServerScriptService.DataStore2)
+
 function PlayerDataHandler:init(e)
     engine = e
 end
 
-function PlayerDataHandler.new(player, datastore)
+function PlayerDataHandler.new(player)
     local self = setmetatable({}, PlayerDataHandler)
     self._player = player
-    self._playerDatastore = datastore
+    self._datastores = {
+        Coins = DataStore2("Coins", self._player),
+        Gems = DataStore2("Gems", self._player),
+        Experience = DataStore2("Experience", self._player),
+        Level = DataStore2("Level", self._player),
+    }
+    self._defaultValues = {
+        Coins = 100,
+        Gems = 25,
+        Level = 1,
+        Experience = 0
+    }
     self._events = {}
-    self._folder = self:_initFolder()
 
     self:_initData()
 
@@ -18,41 +30,33 @@ function PlayerDataHandler.new(player, datastore)
     return self
 end
 
-function PlayerDataHandler:save()
-    local savedData = {}
-
-    for _, valueObj in pairs (self._folder:GetChildren()) do
-        savedData[valueObj.Name] = valueObj.Value
-    end
-    
-    local success, error = pcall(function()
-        self._playerDatastore:SetAsync("Player_" .. tostring(self._player.UserId), savedData)
-    end)
-
-    if success then
-        print("Saved player data for", self._player)
-    else
-        print(error)
-    end
-end
-
 function PlayerDataHandler:_initData()
-    local data = self._playerDatastore:GetAsync("Player_" .. tostring(self._player.UserId))
+    for dataType, datastore in pairs (self._datastores) do
+        local e = game.ReplicatedStorage.shared.Events.DataEvents:FindFirstChild(dataType .. "Updated")
 
-    if data then
-        for _, valObj in pairs (self._folder:GetChildren()) do
-            valObj.Value = data[valObj.Name]
-        end
+        datastore:OnUpdate(function(value) 
+            if e then
+                e:FireClient(self._player, value)
+            else
+                warn("Could not locate", dataType .. "Updated")
+            end
+        end)
 
-        print("Initialized player data", self._player)
+        local value = datastore:Get(self._defaultValues[dataType]) -- updating client ui
+        e:FireClient(self._player, value)
     end
 end
 
-function PlayerDataHandler:_initFolder()
-    local folder = game.ServerStorage.PlayerData:Clone()
-    folder.Parent = self._player 
+function PlayerDataHandler:incrementCoins(amount)
+    self._datastores.Coins:Update(function(oldValue)
+        return math.clamp(oldValue + amount, 0, math.huge)
+    end)
+end
 
-    return folder
+function PlayerDataHandler:incrementExperience(amount)
+    self._datastores.Experience:Update(function(oldValue)
+        return math.clamp(oldValue + amount, 0, math.huge)
+    end)
 end
 
 function PlayerDataHandler:Destroy()
