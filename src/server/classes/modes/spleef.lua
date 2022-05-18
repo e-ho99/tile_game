@@ -74,8 +74,6 @@ function Spleef:onGameTick()
 
                 if selectedTile and selectedTile.PrimaryPart then
                     self:_rumbleAndDestroy(selectedTile) 
-                    
-                    print("Random remove tile")
                 end
             end)
         else
@@ -93,8 +91,6 @@ function Spleef:_onTileInput(player, tile)
         task.spawn(function() 
             self:_rumbleAndDestroy(tile) 
         end)
-
-        print("Click remove tile")
     end
 end
 

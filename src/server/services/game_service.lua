@@ -239,7 +239,6 @@ function GameService:timerComplete()
 end
 
 function GameService:_giveRewards(winners)
-    print("GIVE REWARDS")
     for placement, userId in pairs (winners.Players) do
         local dataHandler = engine.services.data_service:getHandler(userId, "PlayerData")
 

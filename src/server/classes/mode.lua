@@ -87,7 +87,6 @@ function Mode:getWinners()
         local player = game.Players:GetPlayerByUserId(userId)
 
         if modeData["Alive"] and player then
-            print(player)
             if winnersString == "" then
                 winnersString = player.Name
             else

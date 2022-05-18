@@ -96,7 +96,6 @@ end
 
 function FallingTiles:_onTileEntered(player, tile)
     local index = table.find(self._tiles, tile)
-    print(index)
 
     if index then
         table.remove(self._tiles, index)
