@@ -173,7 +173,7 @@ function GameService:toLoading()
         self._map:loadMap()
         self._mode:initMapEvents()
         self._mode:initPlayerEvents(self:getPlayerList())
-        gameEvents.SendPlayers:FireAllClients(self._participatingPlayers)
+        gameEvents.SendPlayers:FireAllClients(self._participatingPlayers) -- send players to ui layer
         task.wait(1.5)
         local playerList = self:getPlayerList()
         self._map:spawnPlayers(playerList, "random")

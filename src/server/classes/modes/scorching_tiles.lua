@@ -53,7 +53,7 @@ function ScorchingTiles:eliminate(player)
 end
 
 function ScorchingTiles:startRound()
-    if not self._enable then
+    if not self._enabled then
         self._enabled = true
 
         for userId, data in pairs(self._playerModeData) do
