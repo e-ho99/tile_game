@@ -12,7 +12,7 @@ function GameServiceClient.new()
     self._map, self._mapModel = gameEvents.GetMap:InvokeServer()
     self._mode = gameEvents.GetMode:InvokeServer()
     self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 75}
-    self._regionHandler = nil
+    self._handlers = {}
     self._tool = nil
 
     self:_initEvents()
@@ -34,24 +34,24 @@ function GameServiceClient:_initEvents()
     end)
 
     gameEvents.ClearGame.OnClientEvent:Connect(function()
-        if self._regionHandler then
-            self._regionHandler = self._regionHandler:Destroy() -- sets _regionHandler to nil
+        for _, handler in pairs (self._handlers) do
+            handler:Destroy()
         end
-        
+
         if self._tool then
             self._tool = self._tool:Destroy()
         end
     end)
 
     gameEvents.ModeEvents.ModeEnabled.OnClientEvent:Connect(function()
-        if self._regionHandler then
-            self._regionHandler:enable()
+        for _, handler in pairs (self._handlers) do
+            handler:enable()
         end
     end)
 
     gameEvents.ModeEvents.ModeDisabled.OnClientEvent:Connect(function()
-        if self._regionHandler then
-            self._regionHandler:disable()
+        for _, handler in pairs (self._handlers) do
+            handler:disable()
         end
     end)
 
@@ -65,7 +65,16 @@ function GameServiceClient:_initEvents()
 
     gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(events)
         if self._mapModel then
-            self._regionHandler = engine.handlers.tile_region_handler.new(self._mapModel)
+            table.insert(self._handlers, engine.handlers.tile_region_handler.new(self._mapModel))
+        end
+    end)
+
+    gameEvents.ModeEvents.InitModeHandler.OnClientEvent:Connect(function(mode, args)
+        local findHandler = engine.handlers[mode .. "_handler"]
+
+        if findHandler then
+            print("created handler", args)
+            findHandler.new(args)
         end
     end)
 
