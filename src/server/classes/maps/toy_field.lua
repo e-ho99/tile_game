@@ -10,7 +10,7 @@ end
 
 function ToyField.new()
     local self =  setmetatable(engine.classes.map.new(), ToyField)
-    self._modes = {"Falling Tiles", "Color Run"}
+    self._modes = {"Falling Tiles", "Color Run", "Spleef"}
     self._mapTemplate = game.ServerStorage.Maps["Toy Field"]
     self._name = "toy field"
     
