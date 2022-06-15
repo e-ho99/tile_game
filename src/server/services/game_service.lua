@@ -19,7 +19,7 @@ function GameService.new()
     self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 60}
     self._rewardsTable = {70, 55, 40, 25} 
     self._minimumPlayers = 1
-    self._intermissionTime = 10
+    self._intermissionTime = 45
 
     self:_initEvents()
     print("Created Game Service")
@@ -239,20 +239,24 @@ function GameService:timerComplete()
 end
 
 function GameService:_giveRewards(winners)
-    for placement, userId in pairs (winners.Players) do
-        local dataHandler = engine.services.data_service:getHandler(userId, "PlayerData")
-
-        if winners.Ordered then
-            placement = math.clamp(placement, 1, 4)
-        else
-            placement = 2
+    if self._mode.giveRewards then
+        self._mode:giveRewards(winners) -- case for custom rewards for mode
+    else
+        for placement, userId in pairs (winners.Players) do
+            local dataHandler = engine.services.data_service:getHandler(userId, "PlayerData")
+    
+            if winners.Ordered then
+                placement = math.clamp(placement, 1, 4)
+            else
+                placement = 2
+            end
+    
+            local coinsAwarded = self._rewardsTable[placement]
+            local expAwarded = 100
+    
+            dataHandler:incrementCoins(coinsAwarded)
+            dataHandler:incrementExperience(expAwarded)
         end
-
-        local coinsAwarded = self._rewardsTable[placement]
-        local expAwarded = 100
-
-        dataHandler:incrementCoins(coinsAwarded)
-        dataHandler:incrementExperience(expAwarded)
     end
 end
 
