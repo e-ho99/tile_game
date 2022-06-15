@@ -84,7 +84,6 @@ function PictureIt:showPortrait(stageNum)
 end 
 
 function PictureIt:spawnPlayers(playerList)
-    print(self._stations)
     for _, station in pairs (self._stations) do
         station:spawnPlayer()
     end

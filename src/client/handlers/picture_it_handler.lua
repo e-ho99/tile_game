@@ -23,7 +23,6 @@ function PictureItHandler:initEvents()
     for _, tile in pairs (self._model.TileSets:GetDescendants()) do
         if tile:IsA("BasePart") then
             tile.ClickDetector.MouseClick:Connect(function() -- garbage collected when click detector deleted
-                print("client click")
                 gameEvents.TileEvents.TileClickDetector:FireServer(tile)
             end)
         end
