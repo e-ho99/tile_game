@@ -12,7 +12,7 @@ function HotplateArena.new()
     local self =  setmetatable(engine.classes.map.new(), HotplateArena)
     self._modes = {"Scorching Tiles"}
     self._mapTemplate = game.ServerStorage.Maps["Hotplate Arena"]
-    self._name = "hotplate arena"
+    self._name = "Hotplate Arena"
     
     return self
 end

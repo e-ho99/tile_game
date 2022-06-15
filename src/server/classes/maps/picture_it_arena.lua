@@ -13,7 +13,7 @@ function PictureIt.new()
     local self =  setmetatable(engine.classes.map.new(), PictureIt)
     self._modes = {"Picture It"}
     self._mapTemplate = game.ServerStorage.Maps["Picture It"]
-    self._name = "picture it arena"
+    self._name = "Picture It Arena"
     self._stations = {}
     
     return self
