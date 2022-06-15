@@ -38,11 +38,15 @@ function Station:clear()
     self._station.Outline.BrickColor = BrickColor.new("Smoky grey")
 end
 
+function Station:Destroy()
+    self._station:Destroy()
+end
+
 function Station:spawnPlayer()
     local c = self._owner.Character
 
     if c then
-        c:PivotTo(self._station.Main.CFrame * CFrame.new(0, 100, 0))
+        c:PivotTo(self._station.Main.CFrame * CFrame.new(0, 10, 0))
     end
 end
 
@@ -53,7 +57,7 @@ function Station:addToWorld(cf, map)
 end
 
 function Station:onTileClicked(tile)
-    if self._enabled then
+    if self._enabled and self._owner.Character and self._owner.Character.Humanoid.Health > 0 then
         local index = tonumber(tile.Name)
         local newIndex = self._currentStatus[index] + 1
 
@@ -63,13 +67,10 @@ function Station:onTileClicked(tile)
 
         self._currentStatus[index] = newIndex
         tile.BrickColor = self._colors[newIndex] -- apply new color
-        print(self._colors[newIndex])
         local success = engine.services.game_service._mode:checkSolution(self._owner, self._currentStatus)
 
         if success then
-            self:disable()
-            self._station.Outline.Color = Color3.fromRGB(68, 188, 78)
-            self._station.Outline.Material = Enum.Material.Neon
+            self:_puzzleSolved()
         end
     end
 end
@@ -90,13 +91,19 @@ function Station:hideTileSet(num)
         end
     else
         local tileset = self._station.TileSets:FindFirstChild(tostring(num))
-        tileset:PivotTo(self._station.Main.CFrame * CFrame.new(0, -30, 0))
+        tileset:PivotTo(self._station.Main.CFrame * CFrame.new(0, -500, 0))
         
         for _, p in pairs (tileset:GetChildren()) do
             p.Transparency = 1
             p.BrickColor = BrickColor.new("Light grey metallic")
         end
     end
+end
+
+function Station:_puzzleSolved()
+    self:disable()
+    self._station.Outline.Color = Color3.fromRGB(68, 188, 78)
+    self._station.Outline.Material = Enum.Material.Neon
 end
 
 function Station:_initClientHandler()
