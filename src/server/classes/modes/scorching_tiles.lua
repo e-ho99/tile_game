@@ -53,7 +53,7 @@ function ScorchingTiles:eliminate(player)
 end
 
 function ScorchingTiles:startRound()
-    if not self._enable then
+    if not self._enabled then
         self._enabled = true
 
         for userId, data in pairs(self._playerModeData) do
@@ -120,13 +120,12 @@ function ScorchingTiles:_claimTile(tile, player)
         end
     end
 
-    if allOccupied and engine.services.timer_service._time > 10 then
+    if allOccupied and engine.services.timer_service._time > 3 then
         engine.services.timer_service:setTimer(3)
     end
 end
 
 function ScorchingTiles:_beginScorch()
-    print("begin scorch")
     local originColor
 
     for i, tile in pairs (self._tiles) do
@@ -145,7 +144,6 @@ function ScorchingTiles:_beginScorch()
                 local t = TweenService:Create(plate, 
                     TweenInfo.new(2, Enum.EasingStyle.Linear), {["Color"] = Color3.fromRGB(54, 54, 54)})
                 t:Play()
-                print("disappear")
             end)
         end
     end
@@ -154,7 +152,6 @@ function ScorchingTiles:_beginScorch()
     self:_burnPlayers()
     task.wait(6)
 
-    print("plastic")
     for i, tile in pairs (self._tiles) do
         tile.Plate.Color = originColor
         tile.Plate.Material = Enum.Material.Plastic

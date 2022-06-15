@@ -242,6 +242,19 @@ function Mode:_initTileExitedEvent()
     table.insert(self._events, exited)
 end
 
+function Mode:_initTileClickDetectorActivated()
+    -- sets up tile exited event to be called from client --
+    local clicked = events.GameEvents.TileEvents.TileClickDetector.OnServerEvent:Connect(function(player, tile)
+        self:_onTileClickDetectorActivated(player, tile)
+    end)
+
+    table.insert(self._events, clicked)
+end
+
+function Mode:_onTileClickDetectorActivated(player, tile)
+    -- overwritten by game modes as what is done varies between modes -- 
+end
+
 function Mode:_onTileEntered(player, tile)
     -- overwritten by game modes as what is done varies between modes -- 
     -- print(player, "entered tile", tile)
