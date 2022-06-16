@@ -1,16 +1,16 @@
-GameDescriptionUI = {}
-GameDescriptionUI.__index = GameDescriptionUI
+ModeDescriptionUI = {}
+ModeDescriptionUI.__index = ModeDescriptionUI
 
 local gameEvents = game.ReplicatedStorage.shared.Events.GameEvents
 local modeEvents = gameEvents.ModeEvents
 
-function GameDescriptionUI:init(e)
+function ModeDescriptionUI:init(e)
     engine = e
-    setmetatable(GameDescriptionUI, engine.interfaces.gui)
+    setmetatable(ModeDescriptionUI, engine.interfaces.gui)
 end
 
-function GameDescriptionUI.new()
-    local self = setmetatable(engine.interfaces.gui.new(script.Name), GameDescriptionUI)
+function ModeDescriptionUI.new()
+    local self = setmetatable(engine.interfaces.gui.new(script.Name), ModeDescriptionUI)
     
     self._mainframe = self._gui.GameDescription
     self:initEvents()
@@ -18,7 +18,7 @@ function GameDescriptionUI.new()
     return self
 end
 
-function GameDescriptionUI:initEvents()
+function ModeDescriptionUI:initEvents()
     gameEvents.ShowGameDescription.OnClientEvent:Connect(function(map, mode, description)
         self._gui.Enabled = true
         self._mainframe.MapLabel.Text = map:upper()
@@ -31,4 +31,4 @@ function GameDescriptionUI:initEvents()
     end)
 end
 
-return GameDescriptionUI
+return ModeDescriptionUI
