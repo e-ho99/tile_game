@@ -35,12 +35,11 @@ function ColorRun:initMapEvents()
         local player = game.Players:GetPlayerByUserId(userId)
 
         if player then
-            events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
+            events.GameEvents.MapEvents.InitTileRegions:FireClient(player, true, true)
         end
     end
 
     self:_initTileEnteredEvent()
-    self:_initTileExitedEvent()
 end
 
 function ColorRun:initPlayerEvents(playerList)

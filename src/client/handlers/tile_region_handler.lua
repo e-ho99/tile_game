@@ -9,11 +9,12 @@ function TileRegionHandler:init(e)
 end
 
 -- manages tile regions to calculate entering/leaving of tiles --
-function TileRegionHandler.new(map) 
+function TileRegionHandler.new(map, trackEntered, trackExited) 
     local self = setmetatable({}, TileRegionHandler)
     self._map = map
     self._regions = {}
     self._enabled = false
+    self._listenedEvents = {entered = trackEntered, exited = trackExited}
     self._tiles = map.Tiles:GetChildren()
     self._tileStates = {}
     self._events = {}
@@ -39,10 +40,16 @@ function TileRegionHandler:_onEnterLoop()
                 
                 if #parts > 1 and not self._tileStates[tile].isEntered then -- on first entrance
                     self._tileStates[tile].isEntered = true
-                    gameEvents.TileEvents.TileEntered:FireServer(tile)
+
+                    if (self._listenedEvents.entered) then
+                        gameEvents.TileEvents.TileEntered:FireServer(tile)
+                    end
                 elseif #parts < 1 and self._tileStates[tile].isEntered then -- on first exit
                     self._tileStates[tile].isEntered = false
-                    gameEvents.TileEvents.TileExited:FireServer(tile)
+
+                    if (self._listenedEvents.exited) then
+                        gameEvents.TileEvents.TileExited:FireServer(tile)
+                    end
                 end
             end
         end

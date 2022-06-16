@@ -25,13 +25,13 @@ end
 function FallingTiles:initMapEvents()
     self._tiles = self._map._model.Tiles:GetChildren()
 
-    for _, userId in pairs(self._participatingPlayers) do
-        local player = game.Players:GetPlayerByUserId(userId)
+    -- for _, userId in pairs(self._participatingPlayers) do
+    --     local player = game.Players:GetPlayerByUserId(userId)
 
-        if player then
-            --events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
-        end
-    end
+    --     if player then
+    --         events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
+    --     end
+    -- end
 end
 
 function FallingTiles:onGameTick()
