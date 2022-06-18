@@ -22,6 +22,7 @@ function Mode.new(map, participatingPlayers)
     self._roundTotal = 1
     self._enabled = false
     self._tool = nil
+    self._description = "This is the default mode description."
     self._hints = {}
     self._participatingPlayers = participatingPlayers
     self._playerModeData = self:_getPlayerModeData(participatingPlayers)

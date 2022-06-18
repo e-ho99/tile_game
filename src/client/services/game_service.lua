@@ -63,9 +63,9 @@ function GameServiceClient:_initEvents()
         engine.services.interface_service:removeGui(uiName .. "UI")
     end)
 
-    gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(events)
+    gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(listenEntered, listenExited)
         if self._mapModel then
-            table.insert(self._handlers, engine.handlers.tile_region_handler.new(self._mapModel))
+            table.insert(self._handlers, engine.handlers.tile_region_handler.new(self._mapModel, listenEntered, listenExited))
         end
     end)
 

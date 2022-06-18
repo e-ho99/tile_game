@@ -153,7 +153,7 @@ end
 
 function PictureIt:startRound()
     local roundToNum = {1, 1, 2, 2, 3, 3}
-    local oldSet = roundToNum[self._currentRound]
+    local oldSet = roundToNum[self._currentRound] or 0
     self._currentRound = self._currentRound + 1
     
     if oldSet > 0 and oldSet ~= roundToNum[self._currentRound] then

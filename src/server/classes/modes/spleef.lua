@@ -18,7 +18,7 @@ function Spleef.new(map, participatingPlayers)
     self._tileState = {} -- stores dict that maps tiles to index of active tiles
     self._tool = game.ServerStorage.Tools.Spleefer
     self._goalPlayerCount = 1
-    self._roundTime = 5
+    self._roundTime = 60
     self._elapsedTime = 0
 
     return self
@@ -30,16 +30,16 @@ function Spleef:initMapEvents()
         self._tileState[tile] = index
     end
 
-    for _, userId in pairs(self._participatingPlayers) do
-        local player = game.Players:GetPlayerByUserId(userId)
+    -- for _, userId in pairs(self._participatingPlayers) do
+    --     local player = game.Players:GetPlayerByUserId(userId)
 
-        if player then
-            events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
-        end
-    end
+    --     if player then
+    --         events.GameEvents.MapEvents.InitTileRegions:FireClient(player)
+    --     end
+    -- end
 
-    self:_initTileEnteredEvent()
-    self:_initTileExitedEvent()
+    -- self:_initTileEnteredEvent()
+    -- self:_initTileExitedEvent()
 end
 
 function Spleef:eliminate(player)
