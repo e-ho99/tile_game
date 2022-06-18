@@ -10,8 +10,8 @@ function InterfaceService.new()
 
     self._playerGuis = {} -- stores references to gui objects
     self._starterGuis = {
-        {"timerUI", true}, {"winnersUI", false}, {"currencyUI", true}, {"map_descriptionUI", false},
-        {"fadeUI", false}} -- guis added when player joins
+        {"timerUI", true}, {"winnersUI", false}, {"currencyUI", true}, {"mode_descriptionUI", false},
+        {"fadeUI", true}} -- guis added when player joins {guiName, enabled}
     
     self:initGuis()
 

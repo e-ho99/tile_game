@@ -15,7 +15,7 @@ function GameService.new()
     
     self._mode = nil -- mode object
     self._map = nil -- map object
-    self._participatingPlayers = {} -- list of Player obj
+    self._participatingPlayers = {} -- list of user id
     self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 60}
     self._rewardsTable = {70, 55, 40, 25} 
     self._minimumPlayers = 1
@@ -49,6 +49,7 @@ function GameService:_initEvents()
             if userId == player.UserId then
                 table.remove(self._participatingPlayers, i)
                 gameEvents.ParticipatingPlayerRemoved:FireAllClients(player.UserId)
+
                 print("Removed", player, "from participating players for leaving")
             end
         end
@@ -168,8 +169,10 @@ end
 
 function GameService:toLoading()
     if self._status ~= "Loading" then
+        math.randomseed(tick()) -- resetting random seed
         self._status = "Loading"
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
+        self:_fadeIn()
         self._map:loadMap()
         self._mode:initMapEvents()
         self._mode:initPlayerEvents(self:getPlayerList())
@@ -185,9 +188,13 @@ end
 
 function GameService:toCountdown()
     if self._status ~= "Countdown" then
+        -- TODO: incorporate game description ui with countdown, 
+        -- extend time and return cam to player at 5s remaining
+
         self._status = "Countdown"   
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, self._mode._name)
-        engine.services.timer_service:enable(5)
+        engine.services.timer_service:enable(13)
+        self:_gameDescriptionEffect()
     end
 end
 
@@ -205,7 +212,7 @@ function GameService:toPostgame()
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         local winners, winnersString = self._mode:getWinners()
         self:_giveRewards(winners)
-        sharedEvents.GameEvents.SendWinners:FireAllClients(winnersString)
+        sharedEvents.GameEvents.SendWinners:FireAllClients(winners.Players, winners.Ordered)
         self:clear()
         self:toIntermission()
         
@@ -235,6 +242,44 @@ function GameService:timerComplete()
         if finalRoundDone then
             self:toPostgame()
         end
+    end
+end
+
+function GameService:_gameDescriptionEffect()
+    self:_showGameDescription()
+    task.wait(1)
+    self:_fadeOut()
+    task.wait(7)
+    self:_fadeIn()
+    task.wait(1)
+    self:_hideGameDescription()
+    task.wait(1)
+    self:_fadeOut()
+end
+
+function GameService:_showGameDescription()
+    --[[ Shows Game Description UI/Camera effects before game begins ]]--
+    -- TODO: camera work
+    for _, player in pairs (self:getPlayerList()) do
+        sharedEvents.GameEvents.ShowGameDescription:FireClient(player, self._map._name, self._mode._name, self._mode._description)
+    end
+end
+
+function GameService:_hideGameDescription()
+    -- [[ Hides Game Description UI/Returns camera to player ]]--
+    -- TODO: return camera to player
+    sharedEvents.GameEvents.HideGameDescription:FireAllClients()
+end
+
+function GameService:_fadeIn()
+    for _, player in pairs (self:getPlayerList()) do
+        sharedEvents.UIEvents.FadeIn:FireClient(player, 1)
+    end
+end
+
+function GameService:_fadeOut()
+    for _, player in pairs (self:getPlayerList()) do
+        sharedEvents.UIEvents.FadeOut:FireClient(player, 1)
     end
 end
 
