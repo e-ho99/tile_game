@@ -19,7 +19,7 @@ function GameService.new()
     self._movement = {["WalkSpeed"] = 21, ["JumpPower"] = 60}
     self._rewardsTable = {70, 55, 40, 25} 
     self._minimumPlayers = 1
-    self._intermissionTime = 45
+    self._intermissionTime = 15
 
     self:_initEvents()
     print("Created Game Service")
@@ -173,6 +173,7 @@ function GameService:toLoading()
         self._status = "Loading"
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         self:_fadeIn()
+        task.wait(1)
         self._map:loadMap()
         self._mode:initMapEvents()
         self._mode:initPlayerEvents(self:getPlayerList())
@@ -212,11 +213,14 @@ function GameService:toPostgame()
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         local winners, winnersString = self._mode:getWinners()
         self:_giveRewards(winners)
-        sharedEvents.GameEvents.SendWinners:FireAllClients(winners.Players, winners.Ordered)
         self:clear()
-        self:toIntermission()
         
-        print("Winners:", winners)
+        -- sending results to client --
+        for _, player in pairs (game.Players:GetPlayers()) do
+            sharedEvents.GameEvents.SendWinners:FireClient(player, winners.Players, winners.Ordered, winners.Rewards[player.UserId])
+        end
+        
+        self:toIntermission()
     end
 end
 
@@ -284,23 +288,51 @@ function GameService:_fadeOut()
 end
 
 function GameService:_giveRewards(winners)
+    winners.Rewards = {} -- storing player rewards here
+
     if self._mode.giveRewards then
         self._mode:giveRewards(winners) -- case for custom rewards for mode
     else
+        if not winners.Order then -- ordered winners should have placements of ALL participants
+            for _, userId in pairs (self._participatingPlayers) do
+                local dataHandler = engine.services.data_service:getHandler(userId, "PlayerData")
+
+                dataHandler:incrementCoins(25)
+                dataHandler:incrementExperience(50)
+
+                winners.Rewards[userId] = {}
+                table.insert(winners.Rewards[userId], {Description = "Played a Game", Type = "Coins", Amount = 25})
+            end
+        end
+
         for placement, userId in pairs (winners.Players) do
             local dataHandler = engine.services.data_service:getHandler(userId, "PlayerData")
+            local coinsAwarded = 0
     
             if winners.Ordered then
-                placement = math.clamp(placement, 1, 4)
+                coinsAwarded = self._rewardsTable[math.clamp(placement, 1, 4)] -- give 1st, 2nd, 3rd better rewards and all others 4th place reward
             else
-                placement = 2
+                coinsAwarded = self._rewardsTable[2] -- give everyone second place money for non-ordered modes
             end
-    
+            
             local coinsAwarded = self._rewardsTable[placement]
-            local expAwarded = 100
+            local expAwarded = 50
     
             dataHandler:incrementCoins(coinsAwarded)
             dataHandler:incrementExperience(expAwarded)
+            
+            if not winners.Rewards[userId] then
+                winners.Rewards[userId] = {}
+            end
+
+            if winners.Ordered then
+                local ordinals = {"st", "nd", "rd"}
+                local desc = (tostring(placement) .. (ordinals[placement] or "th"))
+                
+                table.insert(winners.Rewards[userId], {Description = desc, Type = "Coins", Amount = coinsAwarded})
+            else
+                table.insert(winners.Rewards[userId], {Description = "Win Bonus", Type = "Coins", Amount = coinsAwarded})
+            end
         end
     end
 end

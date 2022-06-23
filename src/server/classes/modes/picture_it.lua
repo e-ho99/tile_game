@@ -137,7 +137,7 @@ function PictureIt:getWinners(winners)
     return winners, winnersString
 end
 
-function PictureIt:giveRewards()
+function PictureIt:giveRewards(winners)
     for userId, playerData in pairs (self._playerModeData) do
         local dataHandler = engine.services.data_service:getHandler(userId, "PlayerData")
         local roundPeak = playerData.RoundPeak
@@ -148,6 +148,10 @@ function PictureIt:giveRewards()
         print("Coins", coinsAwarded)
         dataHandler:incrementCoins(coinsAwarded)
         dataHandler:incrementExperience(expAwarded)
+        winners.Rewards[userId] = {
+            ["Played a game"] = 25,
+            ["Reached round " .. tostring(roundPeak)] = multiplier,
+        }
     end
 end
 
