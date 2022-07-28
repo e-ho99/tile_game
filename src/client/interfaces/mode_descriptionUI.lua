@@ -24,10 +24,14 @@ function ModeDescriptionUI:initEvents()
         self._mainframe.MapLabel.Text = map:upper()
         self._mainframe.ModeLabel.Text = ("[" .. mode .. "]"):upper()
         self._mainframe.DescriptionLabel.Text = description
+
+        engine.services.interface_service:setLobbyGuis(false)
     end)
 
     gameEvents.HideGameDescription.OnClientEvent:Connect(function()
         self._gui.Enabled = false
+        -- TODO: move this to event that happens after 
+        engine.services.interface_service:setLobbyGuis(true)
     end)
 end
 

@@ -89,7 +89,6 @@ function GameService:deactivate()
 end
 
 function GameService:clear()
-    self._mode:respawnPlayers()
     self._map:Destroy()
     self._mode:Destroy()
     self._participatingPlayers = {}
@@ -173,7 +172,7 @@ function GameService:toLoading()
         self._status = "Loading"
         sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         self:_fadeIn()
-        task.wait(1)
+        --task.wait(1)
         self._map:loadMap()
         self._mode:initMapEvents()
         self._mode:initPlayerEvents(self:getPlayerList())
@@ -210,8 +209,8 @@ end
 function GameService:toPostgame()
     if self._status ~= "Postgame" then
         self._status = "Postgame"
-        sharedEvents.TimerEvents.SetStatus:FireAllClients(self._status, "Intermission")
         local winners, winnersString = self._mode:getWinners()
+        self._mode:respawnPlayers()
         self:_giveRewards(winners)
         self:clear()
         
@@ -219,7 +218,7 @@ function GameService:toPostgame()
         for _, player in pairs (game.Players:GetPlayers()) do
             sharedEvents.GameEvents.SendWinners:FireClient(player, winners.Players, winners.Ordered, winners.Rewards[player.UserId])
         end
-        
+
         self:toIntermission()
     end
 end
@@ -250,6 +249,7 @@ function GameService:timerComplete()
 end
 
 function GameService:_gameDescriptionEffect()
+    self:_setCamerasToMap()
     self:_showGameDescription()
     task.wait(1)
     self:_fadeOut()
@@ -257,13 +257,14 @@ function GameService:_gameDescriptionEffect()
     self:_fadeIn()
     task.wait(1)
     self:_hideGameDescription()
+    self:_returnCameras()
+    self._mode:showGui()
     task.wait(1)
     self:_fadeOut()
 end
 
 function GameService:_showGameDescription()
     --[[ Shows Game Description UI/Camera effects before game begins ]]--
-    -- TODO: camera work
     for _, player in pairs (self:getPlayerList()) do
         sharedEvents.GameEvents.ShowGameDescription:FireClient(player, self._map._name, self._mode._name, self._mode._description)
     end
@@ -271,7 +272,6 @@ end
 
 function GameService:_hideGameDescription()
     -- [[ Hides Game Description UI/Returns camera to player ]]--
-    -- TODO: return camera to player
     sharedEvents.GameEvents.HideGameDescription:FireAllClients()
 end
 
@@ -284,6 +284,28 @@ end
 function GameService:_fadeOut()
     for _, player in pairs (self:getPlayerList()) do
         sharedEvents.UIEvents.FadeOut:FireClient(player, 1)
+    end
+end
+
+function GameService:_setCamerasToMap()
+    local cf = self._map:getLoadingCameraCF()
+
+    for _, userId in pairs (self._participatingPlayers) do
+        local player = game.Players:GetPlayerByUserId(userId)
+
+        if player then
+            gameEvents.CameraEvents.LoadingMap:FireClient(player, cf)
+        end
+    end
+end
+
+function GameService:_returnCameras()
+    for _, userId in pairs (self._participatingPlayers) do
+        local player = game.Players:GetPlayerByUserId(userId)
+
+        if player then
+            gameEvents.CameraEvents.ResetCamera:FireClient(player)
+        end
     end
 end
 

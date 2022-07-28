@@ -13,6 +13,7 @@ function Map.new()
     self._modes = {}
     self._mapTemplate = nil
     self._model = nil
+    self._offsetCF = CFrame.new(0, 0, 0)
 
     return self
 end
@@ -22,6 +23,10 @@ function Map:loadMap()
     self._model.Parent = workspace
 
     events.GameEvents.SetMap:FireAllClients(self._name, self._model)
+end
+
+function Map:getLoadingCameraCF()
+    return CFrame.new((self._model.Focus.CFrame * self._offsetCF).Position, self._model.Focus.CFrame.Position)
 end
 
 function Map:spawnPlayers(playerList, spawnType)

@@ -62,7 +62,6 @@ function ColorRun:initPlayerEvents(playerList)
         end
         
         self:_assignTeam(player, i)
-        events.GameEvents.ModeEvents.ShowUI:FireClient(player, self._name:gsub(" ", "_"):lower())  
     end
 end
 

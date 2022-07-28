@@ -56,8 +56,6 @@ function PictureIt:initPlayerEvents(playerList)
                 table.insert(self._events, event)
             end
 
-            modeEvents.ShowUI:FireClient(player, self._uiType or self._name:gsub(" ", "_"):lower())
-
             self:_createStation(player, position)
         end
     end

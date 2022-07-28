@@ -55,14 +55,6 @@ function GameServiceClient:_initEvents()
         end
     end)
 
-    gameEvents.ModeEvents.ShowUI.OnClientEvent:Connect(function(uiName)
-        engine.services.interface_service:addGui(uiName .. "UI", true)
-    end)
-
-    gameEvents.ModeEvents.RemoveUI.OnClientEvent:Connect(function(uiName)
-        engine.services.interface_service:removeGui(uiName .. "UI")
-    end)
-
     gameEvents.MapEvents.InitTileRegions.OnClientEvent:Connect(function(listenEntered, listenExited)
         if self._mapModel then
             table.insert(self._handlers, engine.handlers.tile_region_handler.new(self._mapModel, listenEntered, listenExited))
@@ -85,6 +77,26 @@ function GameServiceClient:_initEvents()
             self._tool = toolObj.new(tool)
         else
             warn("Could not locate tool", tool.Name:lower())
+        end
+    end)
+
+    gameEvents.CameraEvents.LoadingMap.OnClientEvent:Connect(function(cf)
+        gameEvents.CameraEvents.SetCamera:Fire({
+            CameraType = Enum.CameraType.Scriptable,
+            CFrame = cf
+        })
+    end)
+
+    gameEvents.CameraEvents.ResetCamera.OnClientEvent:Connect(function()
+        local camera = workspace.CurrentCamera
+        local character = game.Players.LocalPlayer.Character
+        
+        if character then
+            gameEvents.CameraEvents.SetCamera:Fire({
+                CameraSubject = character.Humanoid,
+                CameraType = Enum.CameraType.Custom,
+                CFrame = character.Head.CFrame
+            })
         end
     end)
 end

@@ -74,7 +74,7 @@ function Mode:Destroy()
     end
 
     for userId, data in pairs (self._playerModeData) do
-        modeEvents.RemoveUI:FireClient(game.Players:GetPlayerByUserId(userId), self._uiType or self._name:gsub(" ", "_"):lower())
+        events.UIEvents.RemoveUI:FireClient(game.Players:GetPlayerByUserId(userId), self._uiType or self._name:gsub(" ", "_"):lower())
     end
 end
 
@@ -146,8 +146,6 @@ function Mode:initPlayerEvents(playerList)
 
                 table.insert(self._events, event)
             end
-
-            modeEvents.ShowUI:FireClient(player, self._uiType or self._name:gsub(" ", "_"):lower())
         end
     end
 end
@@ -163,6 +161,12 @@ function Mode:initMapEvents()
 end
 
 --[[ MISC ]]--
+function Mode:showGui()
+    for _, player in pairs (engine.services.game_service:getPlayerList()) do
+        events.UIEvents.ShowUI:FireClient(player, self._uiType or self._name:gsub(" ", "_"):lower())  
+    end
+end
+
 function Mode:respawnPlayers()
     -- respawn players who need to; defaults to using "Active" key in player's mode data
     for userId, modeData in pairs(self._playerModeData) do

@@ -13,8 +13,10 @@ function HotplateArena.new()
     self._modes = {"Scorching Tiles"}
     self._mapTemplate = game.ServerStorage.Maps["Hotplate Arena"]
     self._name = "Hotplate Arena"
-    
+    self._offsetCF = CFrame.new(54, 15, 54)
+
     return self
 end
+
 
 return HotplateArena

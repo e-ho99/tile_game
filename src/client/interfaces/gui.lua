@@ -7,6 +7,7 @@ end
 
 function Gui.new(guiName) -- accepts script as argument to locate physical gui obj
     local self = setmetatable({}, Gui)
+    self._name = guiName
     self._gui = game.ReplicatedStorage.interfaces:FindFirstChild(guiName):Clone()
     self._events = {}
 
